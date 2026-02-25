@@ -15,9 +15,18 @@ export interface Comment {
   newProvider?: 'BAND' | 'VENUE' | 'ENGINEER';
   previousProvider?: 'BAND' | 'VENUE' | 'ENGINEER';
   previousData?: {
+    category?: Category;
     title?: string;
     description?: string;
     specs?: BriefItem['specs'];
+    provider?: BriefItem['provider'];
+  };
+  newData?: {
+    category?: Category;
+    title?: string;
+    description?: string;
+    specs?: BriefItem['specs'];
+    provider?: BriefItem['provider'];
   };
 }
 

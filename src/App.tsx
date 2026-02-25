@@ -124,23 +124,33 @@ function App() {
     // Detect changes
     const changes: string[] = [];
     const previousData: any = {};
+    const newData: any = {};
 
+    if (updates.category && updates.category !== item.category) {
+      changes.push(`Category: "${item.category}" -> "${updates.category}"`);
+      previousData.category = item.category;
+      newData.category = updates.category;
+    }
     if (updates.title && updates.title !== item.title) {
       changes.push(`Title: "${item.title}" -> "${updates.title}"`);
       previousData.title = item.title;
+      newData.title = updates.title;
     }
     if (updates.description && updates.description !== item.description) {
       changes.push(`Description updated`);
       previousData.description = item.description;
+      newData.description = updates.description;
     }
     if (updates.provider && updates.provider !== item.provider) {
       changes.push(`Provider: "${item.provider}" -> "${updates.provider}"`);
       previousData.provider = item.provider;
+      newData.provider = updates.provider;
     }
     // Simple check for specs changes (could be more granular)
     if (JSON.stringify(updates.specs) !== JSON.stringify(item.specs)) {
       changes.push(`Specs updated`);
       previousData.specs = item.specs;
+      newData.specs = updates.specs;
     }
 
     if (changes.length === 0) return;
@@ -152,7 +162,8 @@ function App() {
       text: `updated the brief:\n${changes.join('\n')}`,
       timestamp: new Date().toISOString(),
       type: 'ITEM_REVISION',
-      previousData
+      previousData,
+      newData
     };
 
     setItems(prev => prev.map(i => 
