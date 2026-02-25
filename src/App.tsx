@@ -345,6 +345,7 @@ function App() {
           {activeTab === 'BRIEF' ? (
             <BriefList 
               items={items} 
+              selectedItem={selectedItem}
               onSelectItem={(item) => {
                 setSelectedItem(item);
                 setIsNewItemPanelOpen(false);

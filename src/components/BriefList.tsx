@@ -6,12 +6,13 @@ import { ChevronRight, Filter, Plus } from 'lucide-react';
 
 interface BriefListProps {
   items: BriefItem[];
+  selectedItem?: BriefItem | null;
   onSelectItem: (item: BriefItem) => void;
   role: Role;
   onAddItem: () => void;
 }
 
-export const BriefList: React.FC<BriefListProps> = ({ items, onSelectItem, role, onAddItem }) => {
+export const BriefList: React.FC<BriefListProps> = ({ items, selectedItem, onSelectItem, role, onAddItem }) => {
   const [filterCategory, setFilterCategory] = useState<Category | 'ALL'>('ALL');
 
   const filteredItems = filterCategory === 'ALL' 
@@ -32,8 +33,10 @@ export const BriefList: React.FC<BriefListProps> = ({ items, onSelectItem, role,
             ALL
           </button>
           {categories.map(cat => {
-            const hasPending = items.some(i => i.category === cat && i.status === 'PENDING');
-            const hasDiscussing = items.some(i => i.category === cat && i.status === 'DISCUSSING');
+            const categoryItems = items.filter(i => i.category === cat);
+            const hasPending = categoryItems.some(i => i.status === 'PENDING');
+            const hasDiscussing = categoryItems.some(i => i.status === 'DISCUSSING');
+            const allAgreed = categoryItems.length > 0 && categoryItems.every(i => i.status === 'AGREED');
             
             return (
               <button 
@@ -43,10 +46,13 @@ export const BriefList: React.FC<BriefListProps> = ({ items, onSelectItem, role,
               >
                 {cat}
                 {hasDiscussing && (
-                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 rounded-full border border-[#E4E3E0] z-10" />
+                  <span className="absolute -top-1 right-0 w-2 h-2 bg-amber-400 rounded-full border border-[#E4E3E0] z-10" />
                 )}
                 {hasPending && (
-                  <span className={`absolute -top-1 w-2 h-2 bg-white rounded-full ${hasDiscussing ? '-right-2' : '-right-1'}`} />
+                  <span className={`absolute -top-1 w-2 h-2 bg-white rounded-full border border-[#E4E3E0] ${hasDiscussing ? 'right-1.5' : 'right-0'}`} />
+                )}
+                {allAgreed && !hasPending && !hasDiscussing && (
+                  <span className="absolute -top-1 right-0 w-2 h-2 bg-emerald-500 rounded-full border border-[#E4E3E0] z-10" />
                 )}
               </button>
             );
@@ -74,33 +80,40 @@ export const BriefList: React.FC<BriefListProps> = ({ items, onSelectItem, role,
 
       {/* Grid Body */}
       <div className="divide-y divide-[#141414]/20">
-        {filteredItems.map((item) => (
-          <div 
-            key={item.id}
-            onClick={() => onSelectItem(item)}
-            className="grid grid-cols-12 gap-4 px-4 py-4 hover:bg-[#141414] hover:text-[#E4E3E0] transition-colors cursor-pointer group items-center"
-          >
-            <div className="col-span-1">
-              <StatusBadge item={item} />
+        {filteredItems.map((item) => {
+          const isSelected = selectedItem?.id === item.id;
+          return (
+            <div 
+              key={item.id}
+              onClick={() => onSelectItem(item)}
+              className={`grid grid-cols-12 gap-4 px-4 py-4 transition-colors cursor-pointer group items-center ${
+                isSelected 
+                  ? 'bg-[#141414] text-[#E4E3E0]' 
+                  : 'hover:bg-neutral-300'
+              }`}
+            >
+              <div className="col-span-1">
+                <StatusBadge item={item} />
+              </div>
+              <div className="col-span-1">
+                <ProviderBadge provider={item.provider} />
+              </div>
+              <div className="col-span-2 font-mono text-xs opacity-70 group-hover:opacity-100">
+                {item.category}
+              </div>
+              <div className="col-span-4">
+                <div className="font-bold font-mono text-sm">{item.title}</div>
+                <div className="text-xs opacity-60 truncate group-hover:opacity-90">{item.description}</div>
+              </div>
+              <div className="col-span-2 font-mono text-xs opacity-70 group-hover:opacity-100">
+                {item.requestedBy}
+              </div>
+              <div className="col-span-2 flex justify-end">
+                <ChevronRight className={`w-4 h-4 transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} />
+              </div>
             </div>
-            <div className="col-span-1">
-              <ProviderBadge provider={item.provider} />
-            </div>
-            <div className="col-span-2 font-mono text-xs opacity-70 group-hover:opacity-100">
-              {item.category}
-            </div>
-            <div className="col-span-4">
-              <div className="font-bold font-mono text-sm">{item.title}</div>
-              <div className="text-xs opacity-60 truncate group-hover:opacity-90">{item.description}</div>
-            </div>
-            <div className="col-span-2 font-mono text-xs opacity-70 group-hover:opacity-100">
-              {item.requestedBy}
-            </div>
-            <div className="col-span-2 flex justify-end">
-              <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
