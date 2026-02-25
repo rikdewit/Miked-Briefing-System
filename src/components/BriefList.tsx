@@ -81,7 +81,7 @@ export const BriefList: React.FC<BriefListProps> = ({ items, onSelectItem, role,
             className="grid grid-cols-12 gap-4 px-4 py-4 hover:bg-[#141414] hover:text-[#E4E3E0] transition-colors cursor-pointer group items-center"
           >
             <div className="col-span-1">
-              <StatusBadge status={item.status} />
+              <StatusBadge item={item} />
             </div>
             <div className="col-span-1">
               <ProviderBadge provider={item.provider} />

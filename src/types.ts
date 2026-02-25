@@ -38,6 +38,8 @@ export interface BriefItem {
   provider?: 'BAND' | 'VENUE' | 'ENGINEER'; // New field: Who provides the item
   status: ItemStatus;
   requestedBy: string; // Band member name
+  createdBy?: Role; // Who created the item
+  pendingConfirmationFrom?: Role; // Who needs to confirm
   assignedTo: string; // Engineer name (optional)
   comments: Comment[];
   specs?: {
@@ -56,11 +58,40 @@ export const MOCK_ITEMS: BriefItem[] = [
     title: 'Lead Vocal Mic',
     description: 'SM58 or comparable for Afke.',
     provider: 'ENGINEER',
-    status: 'PENDING',
+    status: 'AGREED',
     requestedBy: 'Afke',
+    createdBy: 'BAND',
     assignedTo: 'Engineer',
-    comments: [],
-    specs: { make: 'Shure', model: 'SM58', quantity: 1 }
+    comments: [
+      {
+        id: 'c-vocal-1',
+        author: 'Engineer',
+        role: 'ENGINEER',
+        text: 'changed specs to Shure Beta 58A',
+        timestamp: '2023-10-26T10:15:00Z',
+        type: 'ITEM_REVISION',
+        previousData: { specs: { make: 'Shure', model: 'SM58', quantity: 1 } },
+        newData: { specs: { make: 'Shure', model: 'Beta 58A', quantity: 1 } }
+      },
+      {
+        id: 'c-vocal-2',
+        author: 'Afke',
+        role: 'BAND',
+        text: 'even better!',
+        timestamp: '2023-10-26T10:20:00Z',
+        type: 'TEXT'
+      },
+      {
+        id: 'c-vocal-3',
+        author: 'Afke',
+        role: 'BAND',
+        text: 'changed status to AGREED',
+        timestamp: '2023-10-26T10:21:00Z',
+        type: 'STATUS_CHANGE',
+        newStatus: 'AGREED'
+      }
+    ],
+    specs: { make: 'Shure', model: 'Beta 58A', quantity: 1 }
   },
   // Fabio (Sax)
   {
@@ -71,6 +102,8 @@ export const MOCK_ITEMS: BriefItem[] = [
     provider: 'ENGINEER',
     status: 'PENDING',
     requestedBy: 'Fabio',
+    createdBy: 'BAND',
+    pendingConfirmationFrom: 'ENGINEER',
     assignedTo: 'Engineer',
     comments: [],
     specs: { make: 'AEA', model: 'E8 NUVO', quantity: 1 }
@@ -83,6 +116,8 @@ export const MOCK_ITEMS: BriefItem[] = [
     provider: 'ENGINEER',
     status: 'PENDING',
     requestedBy: 'Fabio',
+    createdBy: 'BAND',
+    pendingConfirmationFrom: 'ENGINEER',
     assignedTo: 'Engineer',
     comments: [],
     specs: { quantity: 2, notes: 'Stereo DI' }
@@ -95,8 +130,36 @@ export const MOCK_ITEMS: BriefItem[] = [
     provider: 'VENUE',
     status: 'PENDING',
     requestedBy: 'Fabio',
+    createdBy: 'BAND',
+    pendingConfirmationFrom: 'ENGINEER',
     assignedTo: 'Engineer',
-    comments: [],
+    comments: [
+      {
+        id: 'c-sax-mon-1',
+        author: 'Engineer',
+        role: 'ENGINEER',
+        text: "I can't do stereo monitors, is mono okay?",
+        timestamp: '2023-10-26T10:30:00Z',
+        type: 'TEXT'
+      },
+      {
+        id: 'c-sax-mon-2',
+        author: 'Fabio',
+        role: 'BAND',
+        text: "That's fine.",
+        timestamp: '2023-10-26T10:35:00Z',
+        type: 'TEXT'
+      },
+      {
+        id: 'c-sax-mon-3',
+        author: 'Fabio',
+        role: 'BAND',
+        text: 'changed status to PENDING (waiting for ENGINEER)',
+        timestamp: '2023-10-26T10:36:00Z',
+        type: 'STATUS_CHANGE',
+        newStatus: 'PENDING'
+      }
+    ],
     specs: { quantity: 1, notes: 'Stereo wedge' }
   },
   // Abel (Guitar)
@@ -120,6 +183,8 @@ export const MOCK_ITEMS: BriefItem[] = [
     provider: 'ENGINEER',
     status: 'PENDING',
     requestedBy: 'Abel',
+    createdBy: 'BAND',
+    pendingConfirmationFrom: 'ENGINEER',
     assignedTo: 'Engineer',
     comments: [],
     specs: { quantity: 1 }
@@ -199,6 +264,8 @@ export const MOCK_ITEMS: BriefItem[] = [
     provider: 'VENUE',
     status: 'PENDING',
     requestedBy: 'Band',
+    createdBy: 'BAND',
+    pendingConfirmationFrom: 'ENGINEER',
     assignedTo: 'Engineer',
     comments: [],
     specs: { quantity: 5 }
@@ -209,10 +276,19 @@ export const MOCK_ITEMS: BriefItem[] = [
     title: 'Crew Meals',
     description: '4x no restrictions, 1x vegan.',
     provider: 'VENUE',
-    status: 'AGREED',
+    status: 'DISCUSSING',
     requestedBy: 'Band',
     assignedTo: 'Engineer',
-    comments: [],
+    comments: [
+      {
+        id: 'c-meals-1',
+        author: 'Engineer',
+        role: 'ENGINEER',
+        text: 'can I have food too?!',
+        timestamp: '2023-10-26T11:00:00Z',
+        type: 'TEXT'
+      }
+    ],
     specs: { quantity: 5 }
   },
   {
@@ -226,5 +302,42 @@ export const MOCK_ITEMS: BriefItem[] = [
     assignedTo: 'Engineer',
     comments: [],
     specs: { quantity: 1 }
+  },
+  // Engineer Added Items
+  {
+    id: '13',
+    category: 'PA',
+    title: 'House PA',
+    description: 'Main PA system for the venue.',
+    provider: 'VENUE',
+    status: 'PENDING',
+    requestedBy: 'Engineer',
+    createdBy: 'ENGINEER',
+    pendingConfirmationFrom: 'BAND',
+    assignedTo: 'Engineer',
+    comments: [
+      {
+        id: 'c-pa-1',
+        author: 'Engineer',
+        role: 'ENGINEER',
+        text: 'Suggest using the house PA of Fifth NRE.',
+        timestamp: '2023-10-26T09:00:00Z',
+        type: 'TEXT'
+      }
+    ],
+    specs: { notes: 'Fifth NRE House System' }
+  },
+  {
+    id: '14',
+    category: 'STAGE',
+    title: 'Stage Size',
+    description: 'The stage will be 5 x 3 meters, is that big enough for you?',
+    provider: 'VENUE',
+    status: 'DISCUSSING',
+    requestedBy: 'Engineer',
+    createdBy: 'ENGINEER',
+    assignedTo: 'Engineer',
+    comments: [],
+    specs: { notes: '5m x 3m' }
   }
 ];

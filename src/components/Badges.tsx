@@ -1,8 +1,8 @@
 import React from 'react';
 import { BriefItem, ItemStatus, ItemType } from '../types';
-import { CheckCircle2, Circle, HelpCircle, AlertCircle, Clock, Check } from 'lucide-react';
+import { CheckCircle2, Circle, HelpCircle, AlertCircle, Clock, Check, MessageCircle } from 'lucide-react';
 
-export const StatusBadge = ({ status }: { status: ItemStatus }) => {
+export const StatusBadge = ({ item }: { item: BriefItem }) => {
   const styles = {
     PENDING: 'bg-neutral-200 text-neutral-600 border-neutral-400',
     DISCUSSING: 'bg-amber-100 text-amber-800 border-amber-300',
@@ -11,16 +11,16 @@ export const StatusBadge = ({ status }: { status: ItemStatus }) => {
   };
 
   const icons = {
-    PENDING: <Circle className="w-3 h-3 mr-1" />,
-    DISCUSSING: <Clock className="w-3 h-3 mr-1" />,
+    PENDING: <Clock className="w-3 h-3 mr-1" />,
+    DISCUSSING: <MessageCircle className="w-3 h-3 mr-1" />,
     AGREED: <CheckCircle2 className="w-3 h-3 mr-1" />,
     REJECTED: <AlertCircle className="w-3 h-3 mr-1" />,
   };
 
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-mono border ${styles[status]}`}>
-      {icons[status]}
-      {status}
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-mono border ${styles[item.status]}`}>
+      {icons[item.status]}
+      {item.status}
     </span>
   );
 };

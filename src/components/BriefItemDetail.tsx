@@ -56,36 +56,66 @@ export const BriefItemDetail: React.FC<BriefItemDetailProps> = ({ item, role, on
         <div className="bg-white/50 p-4 border border-[#141414]">
           <div className="flex justify-between items-center mb-4">
             <span className="font-mono text-xs uppercase opacity-60">Current Status</span>
-            <StatusBadge status={item.status} />
+            <div className="flex flex-col items-end">
+              <StatusBadge item={item} />
+              {item.status === 'PENDING' && item.pendingConfirmationFrom && (
+                <span className="text-[10px] font-mono opacity-50 mt-1 uppercase">
+                  Waiting for {item.pendingConfirmationFrom}
+                </span>
+              )}
+            </div>
           </div>
           
           {/* Provider Selection for Engineer */}
           {/* Removed as provider selection is now in edit mode */}
 
           <div className="flex gap-2">
-            {role === 'ENGINEER' && item.status !== 'AGREED' && (
-              <button 
-                onClick={() => onUpdateStatus(item.id, 'AGREED')}
-                className="flex-1 bg-[#141414] text-[#E4E3E0] py-2 px-4 font-mono text-sm hover:bg-emerald-700 transition-colors"
-              >
-                CONFIRM / AGREE
-              </button>
+            {/* Engineer Actions */}
+            {role === 'ENGINEER' && (
+              <>
+                {/* Confirm if Discussing OR if Pending and waiting for Engineer */}
+                {(item.status === 'DISCUSSING' || (item.status === 'PENDING' && (item.pendingConfirmationFrom === 'ENGINEER' || (item.createdBy === 'BAND' && !item.pendingConfirmationFrom)))) && (
+                  <button 
+                    onClick={() => onUpdateStatus(item.id, 'AGREED')}
+                    className="flex-1 bg-[#141414] text-[#E4E3E0] py-2 px-4 font-mono text-sm hover:bg-emerald-700 transition-colors"
+                  >
+                    CONFIRM / AGREE
+                  </button>
+                )}
+                {/* Discuss if Pending (waiting for anyone) or Agreed */}
+                {(item.status === 'PENDING' || item.status === 'AGREED') && (
+                  <button 
+                    onClick={() => onUpdateStatus(item.id, 'DISCUSSING')}
+                    className="flex-1 bg-transparent border border-[#141414] text-[#141414] py-2 px-4 font-mono text-sm hover:bg-amber-100 transition-colors"
+                  >
+                    {item.status === 'AGREED' ? 'RE-OPEN' : 'DISCUSS'}
+                  </button>
+                )}
+              </>
             )}
-            {role === 'ENGINEER' && item.status === 'PENDING' && (
-              <button 
-                onClick={() => onUpdateStatus(item.id, 'DISCUSSING')}
-                className="flex-1 bg-transparent border border-[#141414] text-[#141414] py-2 px-4 font-mono text-sm hover:bg-amber-100 transition-colors"
-              >
-                DISCUSS
-              </button>
-            )}
-             {role === 'BAND' && item.status === 'AGREED' && (
-              <button 
-                onClick={() => onUpdateStatus(item.id, 'DISCUSSING')}
-                className="flex-1 bg-transparent border border-[#141414] text-[#141414] py-2 px-4 font-mono text-sm hover:bg-amber-100 transition-colors"
-              >
-                RE-OPEN
-              </button>
+
+            {/* Band Actions */}
+            {role === 'BAND' && (
+              <>
+                {/* Confirm if Discussing OR if Pending and waiting for Band */}
+                {(item.status === 'DISCUSSING' || (item.status === 'PENDING' && (item.pendingConfirmationFrom === 'BAND' || (item.createdBy === 'ENGINEER' && !item.pendingConfirmationFrom)))) && (
+                  <button 
+                    onClick={() => onUpdateStatus(item.id, 'AGREED')}
+                    className="flex-1 bg-[#141414] text-[#E4E3E0] py-2 px-4 font-mono text-sm hover:bg-emerald-700 transition-colors"
+                  >
+                    CONFIRM / AGREE
+                  </button>
+                )}
+                {/* Discuss if Pending (waiting for anyone) or Agreed */}
+                {(item.status === 'PENDING' || item.status === 'AGREED') && (
+                  <button 
+                    onClick={() => onUpdateStatus(item.id, 'DISCUSSING')}
+                    className="flex-1 bg-transparent border border-[#141414] text-[#141414] py-2 px-4 font-mono text-sm hover:bg-amber-100 transition-colors"
+                  >
+                    {item.status === 'AGREED' ? 'RE-OPEN' : 'DISCUSS'}
+                  </button>
+                )}
+              </>
             )}
           </div>
         </div>

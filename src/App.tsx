@@ -1,53 +1,96 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BriefItem, MOCK_ITEMS, Role, Comment } from './types';
 import { BriefList } from './components/BriefList';
 import { BriefItemDetail } from './components/BriefItemDetail';
 import { ShowSpec } from './components/ShowSpec';
 import { EditItemPanel } from './components/EditItemPanel';
 import { NewItemPanel } from './components/NewItemPanel';
-import { LayoutDashboard, FileText, Settings, UserCircle2, Activity } from 'lucide-react';
+import { LayoutDashboard, FileText, Settings, UserCircle2, Activity, RefreshCw } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 
 function App() {
-  const [items, setItems] = useState<BriefItem[]>(MOCK_ITEMS);
+  const [items, setItems] = useState<BriefItem[]>(() => {
+    const saved = localStorage.getItem('briefItems');
+    return saved ? JSON.parse(saved) : MOCK_ITEMS;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('briefItems', JSON.stringify(items));
+  }, [items]);
+
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
+
+  const handleResetData = () => {
+    setIsResetDialogOpen(true);
+  };
+
+  const confirmResetData = () => {
+    setItems(MOCK_ITEMS);
+    localStorage.removeItem('briefItems');
+    setSelectedItem(null);
+    setIsResetDialogOpen(false);
+  };
+
   const [selectedItem, setSelectedItem] = useState<BriefItem | null>(null);
   const [activeTab, setActiveTab] = useState<'BRIEF' | 'SPEC'>('BRIEF');
   const [currentUserRole, setCurrentUserRole] = useState<Role>('BAND');
   const [isNewItemPanelOpen, setIsNewItemPanelOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<BriefItem | null>(null);
 
-  const handleUpdateStatus = (id: string, status: BriefItem['status']) => {
-    const item = items.find(i => i.id === id);
-    const oldStatus = item?.status;
+  const handleUpdateStatus = (id: string, newStatus: BriefItem['status']) => {
+    setItems(prev => prev.map(item => {
+      if (item.id !== id) return item;
 
-    if (oldStatus === status) return;
+      let updatedItem = { ...item };
+      let actualNewStatus = newStatus;
+      let pendingConfirmationFrom: Role | undefined = undefined;
 
-    const statusChangeComment: Comment = {
-      id: `sys-${Date.now()}`,
-      author: currentUserRole === 'BAND' ? 'Band' : 'Engineer',
-      role: currentUserRole,
-      text: `changed status to ${status}`,
-      timestamp: new Date().toISOString(),
-      type: 'STATUS_CHANGE',
-      newStatus: status
-    };
+      // Logic for Agreement Flow
+      if (newStatus === 'AGREED') {
+        if (item.status === 'DISCUSSING') {
+          // If discussing, first move to PENDING waiting for other party
+          actualNewStatus = 'PENDING';
+          pendingConfirmationFrom = currentUserRole === 'BAND' ? 'ENGINEER' : 'BAND';
+        } else if (item.status === 'PENDING') {
+          // If pending, check if we are the one confirming
+          if (item.pendingConfirmationFrom === currentUserRole || 
+              (item.createdBy && item.createdBy !== currentUserRole && !item.pendingConfirmationFrom)) {
+            actualNewStatus = 'AGREED';
+            pendingConfirmationFrom = undefined;
+          } else {
+             // Should not happen if UI is correct, but safe fallback
+             return item;
+          }
+        }
+      } else if (newStatus === 'DISCUSSING') {
+        // Reset confirmation if moving back to discussion
+        pendingConfirmationFrom = undefined;
+      }
 
-    setItems(prev => prev.map(item => 
-      item.id === id ? { 
-        ...item, 
-        status,
+      const statusChangeComment: Comment = {
+        id: `sys-${Date.now()}`,
+        author: currentUserRole === 'BAND' ? 'Band' : 'Engineer',
+        role: currentUserRole,
+        text: `changed status to ${actualNewStatus}${pendingConfirmationFrom ? ` (waiting for ${pendingConfirmationFrom})` : ''}`,
+        timestamp: new Date().toISOString(),
+        type: 'STATUS_CHANGE',
+        newStatus: actualNewStatus
+      };
+
+      const newItem = {
+        ...updatedItem,
+        status: actualNewStatus,
+        pendingConfirmationFrom,
         comments: [...item.comments, statusChangeComment]
-      } : item
-    ));
-    
-    // Update selected item as well to reflect change immediately in modal
-    if (selectedItem && selectedItem.id === id) {
-      setSelectedItem(prev => prev ? { 
-        ...prev, 
-        status,
-        comments: [...prev.comments, statusChangeComment]
-      } : null);
-    }
+      };
+
+      // Update selected item if it matches
+      if (selectedItem && selectedItem.id === id) {
+        setSelectedItem(newItem);
+      }
+
+      return newItem;
+    }));
   };
 
   const handleUpdateProvider = (id: string, provider: BriefItem['provider']) => {
@@ -111,6 +154,8 @@ function App() {
       status: 'PENDING',
       comments: [],
       assignedTo: 'Unassigned',
+      createdBy: currentUserRole,
+      pendingConfirmationFrom: currentUserRole === 'BAND' ? 'ENGINEER' : 'BAND'
     };
     setItems(prev => [newItem, ...prev]);
     setIsNewItemPanelOpen(false);
@@ -267,6 +312,14 @@ function App() {
               </button>
             </div>
           </div>
+          
+          <button 
+            onClick={handleResetData}
+            className="w-full mt-4 flex items-center justify-center gap-2 py-2 text-[10px] font-mono opacity-30 hover:opacity-100 hover:text-red-400 transition-all border border-transparent hover:border-red-400/20 rounded"
+          >
+            <RefreshCw className="w-3 h-3" />
+            RESET MOCK DATA
+          </button>
         </div>
       </aside>
 
@@ -360,6 +413,44 @@ function App() {
                 setEditingItem(null);
               }}
             />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Reset Confirmation Modal */}
+      <AnimatePresence>
+        {isResetDialogOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-[#E4E3E0] p-6 rounded-lg shadow-xl max-w-md w-full border border-[#141414]"
+            >
+              <h3 className="text-lg font-bold font-mono mb-2">RESET DATA?</h3>
+              <p className="text-sm opacity-70 mb-6">
+                Are you sure you want to reset all data to the initial mock state? This cannot be undone.
+              </p>
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setIsResetDialogOpen(false)}
+                  className="px-4 py-2 text-xs font-mono border border-[#141414] hover:bg-[#141414]/5 transition-colors"
+                >
+                  CANCEL
+                </button>
+                <button
+                  onClick={confirmResetData}
+                  className="px-4 py-2 text-xs font-mono bg-red-600 text-white hover:bg-red-700 transition-colors"
+                >
+                  RESET EVERYTHING
+                </button>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
