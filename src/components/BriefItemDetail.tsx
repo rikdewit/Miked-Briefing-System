@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { BriefItem, Role, Comment } from '../types';
-import { StatusBadge, TypeBadge } from './Badges';
+import { StatusBadge } from './Badges';
 import { ProviderBadge } from './ProviderBadge';
-import { Send, X } from 'lucide-react';
+import { Send, X, Edit2 } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface BriefItemDetailProps {
@@ -12,9 +12,10 @@ interface BriefItemDetailProps {
   onUpdateStatus: (id: string, status: BriefItem['status']) => void;
   onUpdateProvider: (id: string, provider: BriefItem['provider']) => void;
   onAddComment: (id: string, text: string) => void;
+  onEdit: () => void;
 }
 
-export const BriefItemDetail: React.FC<BriefItemDetailProps> = ({ item, role, onClose, onUpdateStatus, onUpdateProvider, onAddComment }) => {
+export const BriefItemDetail: React.FC<BriefItemDetailProps> = ({ item, role, onClose, onUpdateStatus, onUpdateProvider, onAddComment, onEdit }) => {
   const [newComment, setNewComment] = useState('');
 
   const handleSubmitComment = (e: React.FormEvent) => {
@@ -40,9 +41,14 @@ export const BriefItemDetail: React.FC<BriefItemDetailProps> = ({ item, role, on
           </span>
           <h2 className="text-xl font-bold font-mono tracking-tight">{item.title}</h2>
         </div>
-        <button onClick={onClose} className="p-2 hover:bg-[#141414] hover:text-[#E4E3E0] transition-colors rounded-full">
-          <X className="w-5 h-5" />
-        </button>
+        <div className="flex gap-2">
+          <button onClick={onEdit} className="p-2 hover:bg-[#141414] hover:text-[#E4E3E0] transition-colors rounded-full" title="Edit Item">
+            <Edit2 className="w-4 h-4" />
+          </button>
+          <button onClick={onClose} className="p-2 hover:bg-[#141414] hover:text-[#E4E3E0] transition-colors rounded-full">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 space-y-8">
@@ -54,31 +60,7 @@ export const BriefItemDetail: React.FC<BriefItemDetailProps> = ({ item, role, on
           </div>
           
           {/* Provider Selection for Engineer */}
-          {role === 'ENGINEER' && (
-            <div className="mb-4">
-              <span className="font-mono text-xs uppercase opacity-60 block mb-2">Assign Provider</span>
-              <div className="flex gap-2">
-                <button 
-                  onClick={() => onUpdateProvider(item.id, 'VENUE')}
-                  className={`flex-1 py-1 text-xs font-mono border ${item.provider === 'VENUE' ? 'bg-neutral-800 text-white border-neutral-800' : 'border-neutral-300 hover:bg-neutral-100'}`}
-                >
-                  VENUE
-                </button>
-                <button 
-                  onClick={() => onUpdateProvider(item.id, 'ENGINEER')}
-                  className={`flex-1 py-1 text-xs font-mono border ${item.provider === 'ENGINEER' ? 'bg-cyan-800 text-white border-cyan-800' : 'border-cyan-300 hover:bg-cyan-100'}`}
-                >
-                  ENGINEER
-                </button>
-                <button 
-                  onClick={() => onUpdateProvider(item.id, 'BAND')}
-                  className={`flex-1 py-1 text-xs font-mono border ${item.provider === 'BAND' ? 'bg-indigo-800 text-white border-indigo-800' : 'border-indigo-300 hover:bg-indigo-100'}`}
-                >
-                  BAND
-                </button>
-              </div>
-            </div>
-          )}
+          {/* Removed as provider selection is now in edit mode */}
 
           <div className="flex gap-2">
             {role === 'ENGINEER' && item.status !== 'AGREED' && (
@@ -114,9 +96,6 @@ export const BriefItemDetail: React.FC<BriefItemDetailProps> = ({ item, role, on
           <div className="grid grid-cols-3 gap-4 font-mono text-sm mt-3">
             <div className="col-span-1 opacity-60">Provider</div>
             <div className="col-span-2"><ProviderBadge provider={item.provider} /></div>
-
-            <div className="col-span-1 opacity-60">Type</div>
-            <div className="col-span-2"><TypeBadge type={item.type} /></div>
             
             <div className="col-span-1 opacity-60">Description</div>
             <div className="col-span-2">{item.description}</div>
@@ -174,6 +153,71 @@ export const BriefItemDetail: React.FC<BriefItemDetailProps> = ({ item, role, on
                       'bg-cyan-100 text-cyan-800 border-cyan-200'
                     }`}>
                       {comment.author} assigned provider: {comment.newProvider}
+                    </div>
+                  </div>
+                );
+              }
+
+              if (comment.type === 'ITEM_REVISION') {
+                return (
+                  <div key={comment.id} className="flex flex-col items-center my-4 w-full">
+                    <div className="w-full border-t border-[#141414]/10 mb-2 relative">
+                      <span className="absolute left-1/2 -top-2 -translate-x-1/2 bg-[#E4E3E0] px-2 text-[10px] font-mono text-[#141414]/40 uppercase">
+                        Revision
+                      </span>
+                    </div>
+                    <div className="bg-white border border-[#141414] p-3 w-full max-w-[90%] text-xs font-mono">
+                      <div className="flex justify-between items-center mb-2 border-b border-[#141414]/10 pb-1">
+                        <span className="font-bold">{comment.author} updated the brief</span>
+                        <span className="opacity-50">{new Date(comment.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                      </div>
+                      <div className="space-y-1 opacity-70">
+                        {comment.previousData?.title && (
+                          <div>
+                            <span className="opacity-50">Previous Title:</span> {comment.previousData.title}
+                          </div>
+                        )}
+                        {comment.previousData?.description && (
+                          <div>
+                            <span className="opacity-50">Previous Description:</span>
+                            <p className="pl-2 border-l-2 border-[#141414]/20 mt-1 italic">{comment.previousData.description}</p>
+                          </div>
+                        )}
+                        {comment.previousData?.provider && (
+                          <div className="mt-2 flex items-center gap-2">
+                            <span className="opacity-50">Provider Changed:</span>
+                            <div className="flex items-center gap-2">
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                comment.previousData.provider === 'BAND' ? 'bg-indigo-100 text-indigo-800' :
+                                comment.previousData.provider === 'VENUE' ? 'bg-neutral-100 text-neutral-800' :
+                                'bg-cyan-100 text-cyan-800'
+                              }`}>
+                                {comment.previousData.provider}
+                              </span>
+                              <span className="text-[10px] opacity-50">→</span>
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                item.provider === 'BAND' ? 'bg-indigo-100 text-indigo-800' :
+                                item.provider === 'VENUE' ? 'bg-neutral-100 text-neutral-800' :
+                                'bg-cyan-100 text-cyan-800'
+                              }`}>
+                                {item.provider}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                        {comment.previousData?.specs && (
+                          <div className="mt-2">
+                            <span className="opacity-50">Previous Specs:</span>
+                            <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-1 pl-2">
+                              {Object.entries(comment.previousData.specs).map(([key, value]) => (
+                                <div key={key}>
+                                  <span className="opacity-50 capitalize">{key}:</span> {value}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );

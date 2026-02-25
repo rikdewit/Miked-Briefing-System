@@ -3,16 +3,18 @@ import { BriefItem, MOCK_ITEMS, Role, Comment } from './types';
 import { BriefList } from './components/BriefList';
 import { BriefItemDetail } from './components/BriefItemDetail';
 import { ShowSpec } from './components/ShowSpec';
-import { NewItemModal } from './components/NewItemModal';
-import { AnimatePresence } from 'motion/react';
+import { EditItemPanel } from './components/EditItemPanel';
+import { NewItemPanel } from './components/NewItemPanel';
 import { LayoutDashboard, FileText, Settings, UserCircle2, Activity } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 
 function App() {
   const [items, setItems] = useState<BriefItem[]>(MOCK_ITEMS);
   const [selectedItem, setSelectedItem] = useState<BriefItem | null>(null);
   const [activeTab, setActiveTab] = useState<'BRIEF' | 'SPEC'>('BRIEF');
   const [currentUserRole, setCurrentUserRole] = useState<Role>('BAND');
-  const [isNewItemModalOpen, setIsNewItemModalOpen] = useState(false);
+  const [isNewItemPanelOpen, setIsNewItemPanelOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<BriefItem | null>(null);
 
   const handleUpdateStatus = (id: string, status: BriefItem['status']) => {
     const item = items.find(i => i.id === id);
@@ -87,6 +89,7 @@ function App() {
       item.id === id ? { 
         ...item, 
         provider,
+        status: 'DISCUSSING', // Auto-switch to discussing on provider change
         comments: getUpdatedComments(item, provider)
       } : item
     ));
@@ -95,6 +98,7 @@ function App() {
       setSelectedItem(prev => prev ? { 
         ...prev, 
         provider,
+        status: 'DISCUSSING', // Auto-switch to discussing on provider change
         comments: getUpdatedComments(prev, provider)
       } : null);
     }
@@ -109,6 +113,65 @@ function App() {
       assignedTo: 'Unassigned',
     };
     setItems(prev => [newItem, ...prev]);
+    setIsNewItemPanelOpen(false);
+    setSelectedItem(newItem);
+  };
+
+  const handleEditItem = (id: string, updates: Partial<BriefItem>) => {
+    const item = items.find(i => i.id === id);
+    if (!item) return;
+
+    // Detect changes
+    const changes: string[] = [];
+    const previousData: any = {};
+
+    if (updates.title && updates.title !== item.title) {
+      changes.push(`Title: "${item.title}" -> "${updates.title}"`);
+      previousData.title = item.title;
+    }
+    if (updates.description && updates.description !== item.description) {
+      changes.push(`Description updated`);
+      previousData.description = item.description;
+    }
+    if (updates.provider && updates.provider !== item.provider) {
+      changes.push(`Provider: "${item.provider}" -> "${updates.provider}"`);
+      previousData.provider = item.provider;
+    }
+    // Simple check for specs changes (could be more granular)
+    if (JSON.stringify(updates.specs) !== JSON.stringify(item.specs)) {
+      changes.push(`Specs updated`);
+      previousData.specs = item.specs;
+    }
+
+    if (changes.length === 0) return;
+
+    const revisionComment: Comment = {
+      id: `sys-${Date.now()}`,
+      author: currentUserRole === 'BAND' ? 'Band' : 'Engineer',
+      role: currentUserRole,
+      text: `updated the brief:\n${changes.join('\n')}`,
+      timestamp: new Date().toISOString(),
+      type: 'ITEM_REVISION',
+      previousData
+    };
+
+    setItems(prev => prev.map(i => 
+      i.id === id ? { 
+        ...i, 
+        ...updates,
+        status: 'DISCUSSING', // Auto-switch to discussing on edit
+        comments: [...i.comments, revisionComment]
+      } : i
+    ));
+
+    if (selectedItem && selectedItem.id === id) {
+      setSelectedItem(prev => prev ? { 
+        ...prev, 
+        ...updates,
+        status: 'DISCUSSING',
+        comments: [...prev.comments, revisionComment]
+      } : null);
+    }
   };
 
   const handleAddComment = (id: string, text: string) => {
@@ -218,9 +281,15 @@ function App() {
           {activeTab === 'BRIEF' ? (
             <BriefList 
               items={items} 
-              onSelectItem={setSelectedItem} 
+              onSelectItem={(item) => {
+                setSelectedItem(item);
+                setIsNewItemPanelOpen(false);
+              }} 
               role={currentUserRole}
-              onAddItem={() => setIsNewItemModalOpen(true)}
+              onAddItem={() => {
+                setIsNewItemPanelOpen(true);
+                setSelectedItem(null);
+              }}
             />
           ) : (
             <ShowSpec items={items} />
@@ -229,13 +298,15 @@ function App() {
       </main>
 
       {/* Detail Panel / Modal */}
-      <AnimatePresence>
-        {selectedItem && (
-          <>
-            <div 
-              className="fixed inset-0 bg-black/20 backdrop-blur-[1px] z-40"
-              onClick={() => setSelectedItem(null)}
-            />
+      <AnimatePresence mode="wait">
+        {selectedItem && !isNewItemPanelOpen && !editingItem && (
+          <motion.div 
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed right-0 top-0 bottom-0 z-40 h-full shadow-2xl"
+          >
             <BriefItemDetail 
               item={selectedItem} 
               role={currentUserRole}
@@ -243,15 +314,42 @@ function App() {
               onUpdateStatus={handleUpdateStatus}
               onUpdateProvider={handleUpdateProvider}
               onAddComment={handleAddComment}
+              onEdit={() => setEditingItem(selectedItem)}
             />
-          </>
+          </motion.div>
         )}
-        {isNewItemModalOpen && (
-          <NewItemModal 
-            onClose={() => setIsNewItemModalOpen(false)}
-            onSave={handleAddItem}
-            role={currentUserRole}
-          />
+        {isNewItemPanelOpen && (
+          <motion.div 
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed right-0 top-0 bottom-0 z-40 h-full shadow-2xl"
+          >
+            <NewItemPanel 
+              onClose={() => setIsNewItemPanelOpen(false)}
+              onSave={handleAddItem}
+              role={currentUserRole}
+            />
+          </motion.div>
+        )}
+        {editingItem && (
+          <motion.div 
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed right-0 top-0 bottom-0 z-40 h-full shadow-2xl"
+          >
+            <EditItemPanel 
+              item={editingItem}
+              onClose={() => setEditingItem(null)}
+              onSave={(id, updates) => {
+                handleEditItem(id, updates);
+                setEditingItem(null);
+              }}
+            />
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

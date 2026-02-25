@@ -1,7 +1,5 @@
 export type Role = 'BAND' | 'ENGINEER';
 
-export type ItemType = 'EXACT' | 'DEFER' | 'ALTERNATIVE' | 'QUESTION';
-
 export type ItemStatus = 'PENDING' | 'DISCUSSING' | 'AGREED' | 'REJECTED';
 
 export type Category = 'MONITORING' | 'MICROPHONES' | 'PA' | 'BACKLINE' | 'LIGHTING' | 'STAGE' | 'POWER' | 'HOSPITALITY';
@@ -12,10 +10,15 @@ export interface Comment {
   role: Role;
   text: string;
   timestamp: string;
-  type?: 'TEXT' | 'STATUS_CHANGE' | 'PROVIDER_CHANGE';
+  type?: 'TEXT' | 'STATUS_CHANGE' | 'PROVIDER_CHANGE' | 'ITEM_REVISION';
   newStatus?: ItemStatus;
   newProvider?: 'BAND' | 'VENUE' | 'ENGINEER';
   previousProvider?: 'BAND' | 'VENUE' | 'ENGINEER';
+  previousData?: {
+    title?: string;
+    description?: string;
+    specs?: BriefItem['specs'];
+  };
 }
 
 export interface BriefItem {
@@ -23,7 +26,6 @@ export interface BriefItem {
   category: Category;
   title: string;
   description: string;
-  type: ItemType;
   provider?: 'BAND' | 'VENUE' | 'ENGINEER'; // New field: Who provides the item
   status: ItemStatus;
   requestedBy: string; // Band member name
@@ -44,7 +46,6 @@ export const MOCK_ITEMS: BriefItem[] = [
     category: 'MICROPHONES',
     title: 'Lead Vocal Mic',
     description: 'SM58 or comparable for Afke.',
-    type: 'ALTERNATIVE',
     provider: 'ENGINEER',
     status: 'PENDING',
     requestedBy: 'Afke',
@@ -58,7 +59,6 @@ export const MOCK_ITEMS: BriefItem[] = [
     category: 'MICROPHONES',
     title: 'Tenor Sax Mic (Acoustic)',
     description: 'For acoustic sound. Prefer AEA E8 NUVO, otherwise AKG 414 XLII.',
-    type: 'ALTERNATIVE',
     provider: 'ENGINEER',
     status: 'PENDING',
     requestedBy: 'Fabio',
@@ -71,7 +71,6 @@ export const MOCK_ITEMS: BriefItem[] = [
     category: 'MICROPHONES',
     title: 'Sax FX DI',
     description: 'For pedal FX sound. Stereo DI or 2x Mono.',
-    type: 'EXACT',
     provider: 'ENGINEER',
     status: 'PENDING',
     requestedBy: 'Fabio',
@@ -84,7 +83,6 @@ export const MOCK_ITEMS: BriefItem[] = [
     category: 'MONITORING',
     title: 'Sax Monitor',
     description: 'Dedicated ground monitor, stereo preferred.',
-    type: 'EXACT',
     provider: 'VENUE',
     status: 'PENDING',
     requestedBy: 'Fabio',
@@ -98,7 +96,6 @@ export const MOCK_ITEMS: BriefItem[] = [
     category: 'POWER',
     title: 'Guitar Power',
     description: 'Power point for Pedalboard.',
-    type: 'EXACT',
     provider: 'VENUE',
     status: 'AGREED',
     requestedBy: 'Abel',
@@ -111,7 +108,6 @@ export const MOCK_ITEMS: BriefItem[] = [
     category: 'MICROPHONES',
     title: 'Guitar Amp Mic',
     description: 'Mic for Koch Jupiter amp.',
-    type: 'DEFER',
     provider: 'ENGINEER',
     status: 'PENDING',
     requestedBy: 'Abel',
@@ -124,7 +120,6 @@ export const MOCK_ITEMS: BriefItem[] = [
     category: 'BACKLINE',
     title: 'Koch Jupiter Amp',
     description: 'Abel brings his own amp.',
-    type: 'EXACT',
     provider: 'BAND',
     status: 'AGREED',
     requestedBy: 'Abel',
@@ -138,7 +133,6 @@ export const MOCK_ITEMS: BriefItem[] = [
     category: 'BACKLINE',
     title: 'Bass Amp',
     description: 'If backline is available, we would like to use it. Otherwise we bring our own.',
-    type: 'DEFER',
     provider: 'VENUE',
     status: 'DISCUSSING',
     requestedBy: 'Lester',
@@ -159,7 +153,6 @@ export const MOCK_ITEMS: BriefItem[] = [
     category: 'POWER',
     title: 'Bass Power',
     description: 'Power point for Pedalboard.',
-    type: 'EXACT',
     provider: 'VENUE',
     status: 'AGREED',
     requestedBy: 'Lester',
@@ -173,7 +166,6 @@ export const MOCK_ITEMS: BriefItem[] = [
     category: 'BACKLINE',
     title: 'Drum Kit',
     description: 'If jazz drumkit is available, we would like to use it. Otherwise we bring our own.',
-    type: 'DEFER',
     provider: 'VENUE',
     status: 'DISCUSSING',
     requestedBy: 'Youri',
@@ -195,7 +187,6 @@ export const MOCK_ITEMS: BriefItem[] = [
     category: 'STAGE',
     title: 'Music Stands',
     description: 'If available, we would like to use them.',
-    type: 'QUESTION',
     provider: 'VENUE',
     status: 'PENDING',
     requestedBy: 'Band',
@@ -208,7 +199,6 @@ export const MOCK_ITEMS: BriefItem[] = [
     category: 'HOSPITALITY',
     title: 'Crew Meals',
     description: '4x no restrictions, 1x vegan.',
-    type: 'EXACT',
     provider: 'VENUE',
     status: 'AGREED',
     requestedBy: 'Band',
@@ -221,7 +211,6 @@ export const MOCK_ITEMS: BriefItem[] = [
     category: 'HOSPITALITY',
     title: 'Parking',
     description: '1 parking spot required.',
-    type: 'EXACT',
     provider: 'VENUE',
     status: 'AGREED',
     requestedBy: 'Band',

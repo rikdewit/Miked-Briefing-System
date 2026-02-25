@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BriefItem, Role, Category } from '../types';
-import { StatusBadge, TypeBadge } from './Badges';
+import { StatusBadge } from './Badges';
 import { ProviderBadge } from './ProviderBadge';
 import { ChevronRight, Filter, Plus } from 'lucide-react';
 
@@ -66,9 +66,8 @@ export const BriefList: React.FC<BriefListProps> = ({ items, onSelectItem, role,
       <div className="grid grid-cols-12 gap-4 px-4 py-2 border-b border-[#141414] opacity-50 text-[10px] uppercase font-serif-italic tracking-wider">
         <div className="col-span-1">Status</div>
         <div className="col-span-1">Provider</div>
-        <div className="col-span-1">Type</div>
         <div className="col-span-2">Category</div>
-        <div className="col-span-3">Item / Description</div>
+        <div className="col-span-4">Item / Description</div>
         <div className="col-span-2">Requested By</div>
         <div className="col-span-2 text-right">Action</div>
       </div>
@@ -87,13 +86,10 @@ export const BriefList: React.FC<BriefListProps> = ({ items, onSelectItem, role,
             <div className="col-span-1">
               <ProviderBadge provider={item.provider} />
             </div>
-            <div className="col-span-1">
-              <TypeBadge type={item.type} />
-            </div>
             <div className="col-span-2 font-mono text-xs opacity-70 group-hover:opacity-100">
               {item.category}
             </div>
-            <div className="col-span-3">
+            <div className="col-span-4">
               <div className="font-bold font-mono text-sm">{item.title}</div>
               <div className="text-xs opacity-60 truncate group-hover:opacity-90">{item.description}</div>
             </div>
