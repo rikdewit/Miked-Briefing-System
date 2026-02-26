@@ -20,6 +20,7 @@ function App() {
 
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
 
+
   const handleResetData = () => {
     setIsResetDialogOpen(true);
   };
@@ -454,6 +455,11 @@ function App() {
             </motion.div>
           </motion.div>
         )}
+      </AnimatePresence>
+
+      {/* Welcome Modal */}
+      <AnimatePresence>
+
       </AnimatePresence>
     </div>
   );

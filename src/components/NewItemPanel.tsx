@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BriefItem, Category, Role } from '../types';
-import { X, Save } from 'lucide-react';
+import { X, Save, Plus, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface NewItemPanelProps {
   role: Role;
@@ -14,6 +14,7 @@ export const NewItemPanel: React.FC<NewItemPanelProps> = ({ role, onClose, onSav
   const [description, setDescription] = useState('');
   const [requestedBy, setRequestedBy] = useState(role === 'BAND' ? 'Band Member' : 'Engineer');
   const [specs, setSpecs] = useState<BriefItem['specs']>({});
+  const [showSpecs, setShowSpecs] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,7 +29,7 @@ export const NewItemPanel: React.FC<NewItemPanelProps> = ({ role, onClose, onSav
   };
 
   return (
-    <div className="w-[400px] bg-[#E4E3E0] border-l border-[#141414] h-full flex flex-col shadow-2xl z-20">
+    <div className="w-full md:w-[400px] bg-[#E4E3E0] border-l border-[#141414] h-full flex flex-col shadow-2xl z-20">
       {/* Header */}
       <div className="h-16 border-b border-[#141414] flex items-center justify-between px-6 shrink-0 bg-[#E4E3E0]">
         <div className="flex items-center gap-3">
@@ -95,42 +96,54 @@ export const NewItemPanel: React.FC<NewItemPanelProps> = ({ role, onClose, onSav
         </div>
 
         <div className="pt-4 border-t border-[#141414]/10">
-          <h3 className="font-serif-italic text-sm opacity-50 uppercase tracking-wider mb-3">Specifications (Optional)</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-mono uppercase opacity-60 mb-1">Make</label>
-              <input 
-                value={specs?.make || ''}
-                onChange={e => setSpecs({...specs, make: e.target.value})}
-                className="w-full bg-white border border-[#141414] p-2 font-mono text-sm"
-              />
+          <button
+            type="button"
+            onClick={() => setShowSpecs(!showSpecs)}
+            className="flex items-center gap-2 text-xs font-mono uppercase opacity-60 hover:opacity-100 transition-opacity mb-3"
+          >
+            {showSpecs ? <ChevronUp className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+            {showSpecs ? 'Hide Technical Details' : 'Add Technical Details'}
+          </button>
+          
+          {showSpecs && (
+            <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
+              <div>
+                <label className="block text-xs font-mono uppercase opacity-60 mb-1">Make</label>
+                <input 
+                  value={specs?.make || ''}
+                  onChange={e => setSpecs({...specs, make: e.target.value})}
+                  className="w-full bg-white border border-[#141414] p-2 font-mono text-sm"
+                  placeholder="e.g. Shure"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-mono uppercase opacity-60 mb-1">Model</label>
+                <input 
+                  value={specs?.model || ''}
+                  onChange={e => setSpecs({...specs, model: e.target.value})}
+                  className="w-full bg-white border border-[#141414] p-2 font-mono text-sm"
+                  placeholder="e.g. SM58"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-mono uppercase opacity-60 mb-1">Quantity</label>
+                <input 
+                  type="number"
+                  value={specs?.quantity || ''}
+                  onChange={e => setSpecs({...specs, quantity: parseInt(e.target.value) || undefined})}
+                  className="w-full bg-white border border-[#141414] p-2 font-mono text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-mono uppercase opacity-60 mb-1">Notes</label>
+                <input 
+                  value={specs?.notes || ''}
+                  onChange={e => setSpecs({...specs, notes: e.target.value})}
+                  className="w-full bg-white border border-[#141414] p-2 font-mono text-sm"
+                />
+              </div>
             </div>
-            <div>
-              <label className="block text-xs font-mono uppercase opacity-60 mb-1">Model</label>
-              <input 
-                value={specs?.model || ''}
-                onChange={e => setSpecs({...specs, model: e.target.value})}
-                className="w-full bg-white border border-[#141414] p-2 font-mono text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-mono uppercase opacity-60 mb-1">Quantity</label>
-              <input 
-                type="number"
-                value={specs?.quantity || ''}
-                onChange={e => setSpecs({...specs, quantity: parseInt(e.target.value) || undefined})}
-                className="w-full bg-white border border-[#141414] p-2 font-mono text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-mono uppercase opacity-60 mb-1">Notes</label>
-              <input 
-                value={specs?.notes || ''}
-                onChange={e => setSpecs({...specs, notes: e.target.value})}
-                className="w-full bg-white border border-[#141414] p-2 font-mono text-sm"
-              />
-            </div>
-          </div>
+          )}
         </div>
       </form>
 
