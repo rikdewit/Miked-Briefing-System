@@ -5,7 +5,7 @@ import { BriefItemDetail } from './components/BriefItemDetail';
 import { ShowSpec } from './components/ShowSpec';
 import { EditItemPanel } from './components/EditItemPanel';
 import { NewItemPanel } from './components/NewItemPanel';
-import { LayoutDashboard, FileText, Settings, UserCircle2, Activity, RefreshCw } from 'lucide-react';
+import { LayoutDashboard, FileText, Settings, UserCircle2, Activity, RefreshCw, Truck, UserCog } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 
 function App() {
@@ -262,104 +262,104 @@ function App() {
   const discussingCount = items.filter(i => i.status === 'DISCUSSING').length;
   const agreedCount = items.filter(i => i.status === 'AGREED').length;
 
+  const handleBackgroundClick = (e: React.MouseEvent) => {
+    // Only close if clicking the background itself, not a child
+    if (e.target === e.currentTarget) {
+      setSelectedItem(null);
+      setIsNewItemPanelOpen(false);
+      setEditingItem(null);
+    }
+  };
+
   return (
-    <div className="flex h-screen bg-[#E4E3E0] text-[#141414] font-sans overflow-hidden">
-      {/* Sidebar */}
-      <aside className="w-64 bg-[#141414] text-[#E4E3E0] flex flex-col border-r border-[#141414] shrink-0 h-full">
-        <div className="p-6 border-b border-[#E4E3E0]/10">
-          <h1 className="text-2xl font-bold tracking-tighter font-mono">
+    <div className="flex flex-col h-screen bg-[#E4E3E0] text-[#141414] font-sans overflow-hidden">
+      {/* Header */}
+      <header className="h-14 border-b border-[#141414] bg-[#E4E3E0] flex items-center justify-between px-4 shrink-0 z-10 gap-4 relative">
+        {/* Left: Branding + Role Selector */}
+        <div className="flex items-center gap-4 md:gap-6">
+          <h1 className="text-lg font-bold tracking-tighter font-mono hidden md:block">
             TECH<span className="text-emerald-500">RIDER</span>
           </h1>
-          <div className="text-[10px] opacity-50 font-mono mt-1">
-            COLLABORATIVE STAGE PLOT
-          </div>
-        </div>
-
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-          <button 
-            onClick={() => setActiveTab('BRIEF')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeTab === 'BRIEF' ? 'bg-[#E4E3E0] text-[#141414] font-bold' : 'hover:bg-[#E4E3E0]/10 opacity-70 hover:opacity-100'}`}
-          >
-            <LayoutDashboard className="w-4 h-4" />
-            <span className="font-mono text-xs tracking-wider">BRIEF OVERVIEW</span>
-          </button>
-          <button 
-            onClick={() => setActiveTab('SPEC')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeTab === 'SPEC' ? 'bg-[#E4E3E0] text-[#141414] font-bold' : 'hover:bg-[#E4E3E0]/10 opacity-70 hover:opacity-100'}`}
-          >
-            <FileText className="w-4 h-4" />
-            <span className="font-mono text-xs tracking-wider">SHOW SPEC</span>
-          </button>
-        </nav>
-
-        <div className="p-4 border-t border-[#E4E3E0]/10 bg-[#141414]">
-          <div className="bg-[#E4E3E0]/5 rounded-lg p-3">
-            <div className="flex items-center gap-2 mb-2 opacity-50">
-              <UserCircle2 className="w-4 h-4" />
-              <span className="text-[10px] font-mono uppercase">Current Role</span>
-            </div>
-            <div className="flex gap-1 bg-black/20 p-1 rounded">
-              <button 
-                onClick={() => setCurrentUserRole('BAND')}
-                className={`flex-1 py-1 text-[10px] font-mono rounded text-center transition-colors ${currentUserRole === 'BAND' ? 'bg-[#E4E3E0] text-[#141414] font-bold' : 'opacity-50 hover:opacity-100'}`}
-              >
-                BAND
-              </button>
-              <button 
-                onClick={() => setCurrentUserRole('ENGINEER')}
-                className={`flex-1 py-1 text-[10px] font-mono rounded text-center transition-colors ${currentUserRole === 'ENGINEER' ? 'bg-[#E4E3E0] text-[#141414] font-bold' : 'opacity-50 hover:opacity-100'}`}
-              >
-                ENGINEER
-              </button>
-            </div>
-          </div>
           
-          <button 
-            onClick={handleResetData}
-            className="w-full mt-4 flex items-center justify-center gap-2 py-2 text-[10px] font-mono opacity-30 hover:opacity-100 hover:text-red-400 transition-all border border-transparent hover:border-red-400/20 rounded"
-          >
-            <RefreshCw className="w-3 h-3" />
-            RESET MOCK DATA
-          </button>
+          {/* Role Toggle */}
+          <div className="flex items-center gap-2 bg-[#141414]/5 px-2 py-1 rounded-lg border border-[#141414]/5">
+            <span className="text-[10px] font-mono opacity-40 uppercase hidden sm:inline">Role:</span>
+            <button 
+              onClick={() => setCurrentUserRole('BAND')}
+              className={`flex items-center px-2 py-0.5 text-[10px] font-mono rounded transition-colors ${
+                currentUserRole === 'BAND' 
+                  ? 'bg-indigo-100 text-indigo-800 border-indigo-300 font-bold border' 
+                  : 'opacity-50 hover:opacity-100'
+              }`}
+            >
+              <Truck className="w-3 h-3 mr-1" />
+              BAND
+            </button>
+            <button 
+              onClick={() => setCurrentUserRole('ENGINEER')}
+              className={`flex items-center px-2 py-0.5 text-[10px] font-mono rounded transition-colors ${
+                currentUserRole === 'ENGINEER' 
+                  ? 'bg-cyan-100 text-cyan-800 border-cyan-300 font-bold border' 
+                  : 'opacity-50 hover:opacity-100'
+              }`}
+            >
+              <UserCog className="w-3 h-3 mr-1" />
+              ENG
+            </button>
+          </div>
+
+          <div className="h-4 w-px bg-[#141414]/10 hidden sm:block" />
+          
+          <p className="text-[10px] font-mono opacity-50 hidden sm:block">
+            {items.filter(i => i.status === 'AGREED').length} / {items.length} CONFIRMED
+          </p>
         </div>
-      </aside>
+
+        {/* Right: Reset */}
+        <div className="flex items-center gap-3 md:gap-6">
+           <div className="hidden md:block text-right font-mono text-[10px] opacity-40 leading-tight">
+            <div>AFKE FLAVIANA</div>
+            <div>THE SPOKEN QUINTET TOUR</div>
+          </div>
+
+          <div className="flex items-center gap-3">
+             {/* Reset */}
+             <button 
+               onClick={handleResetData} 
+               title="Reset Data"
+               className="p-1.5 hover:bg-red-100 rounded-md transition-colors group"
+             >
+               <RefreshCw className="w-3.5 h-3.5 opacity-40 group-hover:opacity-100 group-hover:text-red-500" />
+             </button>
+          </div>
+        </div>
+      </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
-        <header className="h-16 border-b border-[#141414] bg-[#E4E3E0] flex items-center justify-between px-6 shrink-0 z-10">
-          <div className="flex items-center gap-4">
-            <h2 className="font-bold text-lg tracking-tight">
-              {activeTab === 'BRIEF' ? 'Technical Brief' : 'Show Specification'}
-            </h2>
-            <div className="h-4 w-px bg-[#141414]/20" />
-            <p className="text-xs font-mono opacity-60">
-              {items.filter(i => i.status === 'AGREED').length} / {items.length} Items Confirmed
-            </p>
-          </div>
-          <div className="hidden md:block text-right font-mono text-xs opacity-50">
-            <div>ARTIST: AFKE FLAVIANA</div>
-            <div>EVENT: THE SPOKEN QUINTET TOUR</div>
-          </div>
-        </header>
-
-        <div className="flex-1 overflow-y-auto p-6 pb-24">
-          {activeTab === 'BRIEF' ? (
-            <BriefList 
-              items={items} 
-              selectedItem={selectedItem}
-              onSelectItem={(item) => {
+      <main 
+        className="flex-1 flex flex-col overflow-hidden relative"
+        onClick={handleBackgroundClick}
+      >
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-24">
+          <BriefList 
+            items={items} 
+            selectedItem={selectedItem}
+            onSelectItem={(item) => {
+              // Toggle logic: if clicking the already selected item, close it.
+              if (selectedItem?.id === item.id) {
+                setSelectedItem(null);
+                setIsNewItemPanelOpen(false);
+              } else {
                 setSelectedItem(item);
                 setIsNewItemPanelOpen(false);
-              }} 
-              role={currentUserRole}
-              onAddItem={() => {
-                setIsNewItemPanelOpen(true);
-                setSelectedItem(null);
-              }}
-            />
-          ) : (
-            <ShowSpec items={items} />
-          )}
+              }
+            }} 
+            role={currentUserRole}
+            onAddItem={() => {
+              setIsNewItemPanelOpen(true);
+              setSelectedItem(null);
+            }}
+          />
         </div>
       </main>
 

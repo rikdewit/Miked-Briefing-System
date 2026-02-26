@@ -85,7 +85,10 @@ export const BriefList: React.FC<BriefListProps> = ({ items, selectedItem, onSel
           return (
             <div 
               key={item.id}
-              onClick={() => onSelectItem(item)}
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent background click from firing immediately
+                onSelectItem(item);
+              }}
               className={`grid grid-cols-12 gap-4 px-4 py-4 transition-colors cursor-pointer group items-center ${
                 isSelected 
                   ? 'bg-[#141414] text-[#E4E3E0]' 
