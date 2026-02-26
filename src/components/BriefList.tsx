@@ -24,8 +24,8 @@ export const BriefList: React.FC<BriefListProps> = ({ items, selectedItem, onSel
   return (
     <div className="w-full">
       {/* Toolbar */}
-      <div className="flex justify-between items-center mb-6 p-1">
-        <div className="flex gap-2 overflow-x-auto py-2">
+      <div className="sticky top-0 bg-[#E4E3E0] z-20 flex justify-between items-center mb-0 p-4 border-b border-[#141414]/10">
+        <div className="flex gap-2 overflow-x-auto py-2 no-scrollbar">
           <button 
             onClick={() => setFilterCategory('ALL')}
             className={`px-3 py-1 text-xs font-mono border ${filterCategory === 'ALL' ? 'bg-[#141414] text-[#E4E3E0] border-[#141414]' : 'border-transparent hover:border-[#141414]'}`}
@@ -69,13 +69,13 @@ export const BriefList: React.FC<BriefListProps> = ({ items, selectedItem, onSel
       </div>
 
       {/* Grid Header */}
-      <div className="grid grid-cols-12 gap-4 px-4 py-2 border-b border-[#141414] opacity-50 text-[10px] uppercase font-serif-italic tracking-wider">
-        <div className="col-span-1">Status</div>
-        <div className="col-span-1">Provider</div>
-        <div className="col-span-2">Category</div>
-        <div className="col-span-4">Item / Description</div>
-        <div className="col-span-2">Requested By</div>
-        <div className="col-span-2 text-right">Action</div>
+      <div className="sticky top-[73px] bg-[#E4E3E0] z-20 grid grid-cols-12 gap-4 px-4 py-2 border-b border-[#141414] text-[10px] uppercase font-serif-italic tracking-wider">
+        <div className="col-span-1 opacity-50">Status</div>
+        <div className="col-span-1 opacity-50">Provider</div>
+        <div className="col-span-2 opacity-50">Category</div>
+        <div className="col-span-4 opacity-50">Item / Description</div>
+        <div className="col-span-2 opacity-50">Requested By</div>
+        <div className="col-span-2 text-right opacity-50">Action</div>
       </div>
 
       {/* Grid Body */}

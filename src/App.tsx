@@ -340,7 +340,7 @@ function App() {
         className="flex-1 flex flex-col overflow-hidden relative"
         onClick={handleBackgroundClick}
       >
-        <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-24">
+        <div className="flex-1 overflow-y-auto pb-24">
           <BriefList 
             items={items} 
             selectedItem={selectedItem}
