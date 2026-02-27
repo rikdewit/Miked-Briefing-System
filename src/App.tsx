@@ -284,22 +284,22 @@ function App() {
           {/* Role Toggle */}
           <div className="flex items-center gap-2 bg-[#141414]/5 px-2 py-1 rounded-lg border border-[#141414]/5">
             <span className="text-[10px] font-mono opacity-40 uppercase hidden sm:inline">Role:</span>
-            <button 
+            <button
               onClick={() => setCurrentUserRole('BAND')}
               className={`flex items-center px-2 py-0.5 text-[10px] font-mono rounded transition-colors ${
-                currentUserRole === 'BAND' 
-                  ? 'bg-indigo-100 text-indigo-800 border-indigo-300 font-bold border' 
+                currentUserRole === 'BAND'
+                  ? 'bg-indigo-100 text-indigo-800 border-indigo-300 font-bold border'
                   : 'opacity-50 hover:opacity-100'
               }`}
             >
               <Truck className="w-3 h-3 mr-1" />
               BAND
             </button>
-            <button 
+            <button
               onClick={() => setCurrentUserRole('ENGINEER')}
               className={`flex items-center px-2 py-0.5 text-[10px] font-mono rounded transition-colors ${
-                currentUserRole === 'ENGINEER' 
-                  ? 'bg-cyan-100 text-cyan-800 border-cyan-300 font-bold border' 
+                currentUserRole === 'ENGINEER'
+                  ? 'bg-cyan-100 text-cyan-800 border-cyan-300 font-bold border'
                   : 'opacity-50 hover:opacity-100'
               }`}
             >
@@ -307,6 +307,15 @@ function App() {
               ENG
             </button>
           </div>
+
+          {/* Reset */}
+          <button
+            onClick={handleResetData}
+            title="Reset Data"
+            className="p-1.5 hover:bg-red-100 rounded-md transition-colors group"
+          >
+            <RefreshCw className="w-3.5 h-3.5 opacity-40 group-hover:opacity-100 group-hover:text-red-500" />
+          </button>
 
           <div className="h-4 w-px bg-[#141414]/10 hidden sm:block" />
           
@@ -322,16 +331,6 @@ function App() {
             <div>THE SPOKEN QUINTET TOUR</div>
           </div>
 
-          <div className="flex items-center gap-3">
-             {/* Reset */}
-             <button 
-               onClick={handleResetData} 
-               title="Reset Data"
-               className="p-1.5 hover:bg-red-100 rounded-md transition-colors group"
-             >
-               <RefreshCw className="w-3.5 h-3.5 opacity-40 group-hover:opacity-100 group-hover:text-red-500" />
-             </button>
-          </div>
         </div>
       </header>
 

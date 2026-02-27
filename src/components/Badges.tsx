@@ -17,11 +17,28 @@ export const StatusBadge = ({ item }: { item: BriefItem }) => {
     REJECTED: <AlertCircle className="w-3 h-3 mr-1" />,
   };
 
+  const labels: Record<string, string> = {
+    DISCUSSING: 'DISCUSS',
+  };
+
   return (
     <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-mono border ${styles[item.status]}`}>
       {icons[item.status]}
-      {item.status}
+      {labels[item.status] ?? item.status}
     </span>
+  );
+};
+
+export const StatusCircle = ({ status }: { status: BriefItem['status'] }) => {
+  const styles = {
+    PENDING: 'bg-neutral-400',
+    DISCUSSING: 'bg-amber-400',
+    AGREED: 'bg-emerald-400',
+    REJECTED: 'bg-red-400',
+  };
+
+  return (
+    <span className={`inline-block w-1.5 h-1.5 rounded-full ${styles[status]}`} />
   );
 };
 
