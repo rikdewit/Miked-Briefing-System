@@ -238,8 +238,8 @@ export const GlobalChat: React.FC<GlobalChatProps> = ({
     return (
       <Shell>
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-4 border-b border-[#141414] shrink-0">
-          <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-[#141414] shrink-0 gap-3">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             <button onClick={() => { onCloseItem(); setText(''); }} className="p-1.5 hover:bg-[#141414] hover:text-[#E4E3E0] transition-colors rounded-full shrink-0">
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -248,56 +248,23 @@ export const GlobalChat: React.FC<GlobalChatProps> = ({
               <h2 className="text-sm font-bold font-mono tracking-tight truncate">{item.title}</h2>
             </div>
           </div>
-          <button onClick={onEdit} className="p-2 hover:bg-[#141414] hover:text-[#E4E3E0] transition-colors rounded-full shrink-0">
-            <Edit2 className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="flex flex-col items-end">
+              <StatusBadge item={item} />
+              {item.status === 'PENDING' && item.pendingConfirmationFrom && (
+                <span className="text-[10px] font-mono opacity-50 mt-0.5 uppercase">Waiting for {item.pendingConfirmationFrom}</span>
+              )}
+            </div>
+            <button onClick={onEdit} className="p-2 hover:bg-[#141414] hover:text-[#E4E3E0] transition-colors rounded-full shrink-0">
+              <Edit2 className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Status + Specs — fixed */}
-          <div className="px-6 pt-5 pb-4 space-y-5 shrink-0">
-            {/* Status card */}
-            <div className="bg-white/50 p-4 border border-[#141414]">
-              <div className="flex justify-between items-center mb-4">
-                <span className="font-mono text-xs uppercase opacity-60">Current Status</span>
-                <div className="flex flex-col items-end">
-                  <StatusBadge item={item} />
-                  {item.status === 'PENDING' && item.pendingConfirmationFrom && (
-                    <span className="text-[10px] font-mono opacity-50 mt-1 uppercase">Waiting for {item.pendingConfirmationFrom}</span>
-                  )}
-                </div>
-              </div>
-              <div className="flex gap-2">
-                {role === 'ENGINEER' && (
-                  <>
-                    {(item.status === 'DISCUSSING' || (item.status === 'PENDING' && (item.pendingConfirmationFrom === 'ENGINEER' || (item.createdBy === 'BAND' && !item.pendingConfirmationFrom)))) && (
-                      <button onClick={() => onUpdateStatus(item.id, 'AGREED')} className="flex-1 bg-[#141414] text-[#E4E3E0] py-2 px-4 font-mono text-sm hover:bg-emerald-700 transition-colors">CONFIRM / AGREE</button>
-                    )}
-                    {(item.status === 'PENDING' || item.status === 'AGREED') && (
-                      <button onClick={() => onUpdateStatus(item.id, 'DISCUSSING')} className="flex-1 bg-transparent border border-[#141414] text-[#141414] py-2 px-4 font-mono text-sm hover:bg-amber-100 transition-colors">
-                        {item.status === 'AGREED' ? 'RE-OPEN' : 'DISCUSS'}
-                      </button>
-                    )}
-                  </>
-                )}
-                {role === 'BAND' && (
-                  <>
-                    {(item.status === 'DISCUSSING' || (item.status === 'PENDING' && (item.pendingConfirmationFrom === 'BAND' || (item.createdBy === 'ENGINEER' && !item.pendingConfirmationFrom)))) && (
-                      <button onClick={() => onUpdateStatus(item.id, 'AGREED')} className="flex-1 bg-[#141414] text-[#E4E3E0] py-2 px-4 font-mono text-sm hover:bg-emerald-700 transition-colors">CONFIRM / AGREE</button>
-                    )}
-                    {(item.status === 'PENDING' || item.status === 'AGREED') && (
-                      <button onClick={() => onUpdateStatus(item.id, 'DISCUSSING')} className="flex-1 bg-transparent border border-[#141414] text-[#141414] py-2 px-4 font-mono text-sm hover:bg-amber-100 transition-colors">
-                        {item.status === 'AGREED' ? 'RE-OPEN' : 'DISCUSS'}
-                      </button>
-                    )}
-                  </>
-                )}
-              </div>
-            </div>
-            {/* Spec grid */}
-            <div>
-              <h3 className="font-serif-italic text-sm opacity-50 uppercase tracking-wider mb-2 border-b border-[#141414] pb-1">Specification</h3>
-              <div className="grid grid-cols-3 gap-4 font-mono text-sm mt-3">
+          {/* Spec — fixed */}
+          <div className="px-6 pt-4 pb-4 shrink-0">
+            <div className="grid grid-cols-3 gap-4 font-mono text-sm">
                 <div className="col-span-1 opacity-60">Provider</div><div className="col-span-2"><ProviderBadge provider={item.provider} /></div>
                 <div className="col-span-1 opacity-60">Description</div><div className="col-span-2">{item.description}</div>
                 {item.specs?.make && (<><div className="col-span-1 opacity-60">Make</div><div className="col-span-2">{item.specs.make}</div></>)}
@@ -306,7 +273,6 @@ export const GlobalChat: React.FC<GlobalChatProps> = ({
                 {item.specs?.notes && (<><div className="col-span-1 opacity-60">Notes</div><div className="col-span-2">{item.specs.notes}</div></>)}
               </div>
             </div>
-          </div>
 
           {/* Discussion — scrollable */}
           <div className="flex flex-col flex-1 overflow-hidden">
@@ -315,7 +281,9 @@ export const GlobalChat: React.FC<GlobalChatProps> = ({
               {item.comments.length === 0 && (
                 <p className="font-mono text-xs text-center opacity-40 py-4">No comments yet.</p>
               )}
-              {item.comments.map((comment) => {
+              {(() => {
+                const lastRevisionId = [...item.comments].reverse().find(c => c.type === 'ITEM_REVISION')?.id;
+                return item.comments.map((comment) => {
                 if (comment.type === 'STATUS_CHANGE') {
                   return (
                     <div key={comment.id} className="flex justify-center my-2">
@@ -392,6 +360,11 @@ export const GlobalChat: React.FC<GlobalChatProps> = ({
                             </div>
                           )}
                         </div>
+                        {comment.pendingUpdates && comment.id === lastRevisionId && item.pendingConfirmationFrom === role && (
+                          <button onClick={() => onUpdateStatus(item.id, 'AGREED')} className="mt-3 w-full bg-[#141414] text-[#E4E3E0] py-2 px-4 font-mono text-xs hover:bg-emerald-700 transition-colors">
+                            ACCEPT CHANGES
+                          </button>
+                        )}
                       </div>
                       <span className="font-mono text-[10px] mt-1 opacity-50">
                         {comment.author} updated brief • {new Date(comment.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -408,7 +381,32 @@ export const GlobalChat: React.FC<GlobalChatProps> = ({
                     </span>
                   </div>
                 );
-              })}
+              }); })()}
+              {(() => {
+                const lastMeaningfulComment = [...item.comments].reverse().find(c => c.type === 'ITEM_REVISION' || c.type === 'STATUS_CHANGE');
+                const pendingFromEdit = lastMeaningfulComment?.type === 'ITEM_REVISION';
+                const canAgree = !pendingFromEdit && (
+                  item.status === 'DISCUSSING' ||
+                  (item.status === 'PENDING' && item.pendingConfirmationFrom === role) ||
+                  (item.status === 'PENDING' && item.createdBy !== role && !item.pendingConfirmationFrom)
+                );
+                const canReopen = item.status === 'PENDING' || item.status === 'AGREED';
+                if (!canAgree && !canReopen) return null;
+                return (
+                  <div className="pt-3 pb-2 flex gap-2">
+                    {canAgree && (
+                      <button onClick={() => onUpdateStatus(item.id, 'AGREED')} className="flex-1 bg-[#141414] text-[#E4E3E0] py-2 px-4 font-mono text-xs hover:bg-emerald-700 transition-colors">
+                        CONFIRM / AGREE
+                      </button>
+                    )}
+                    {canReopen && (
+                      <button onClick={() => onUpdateStatus(item.id, 'DISCUSSING')} className="flex-1 bg-transparent border border-[#141414] text-[#141414] py-2 px-4 font-mono text-xs hover:bg-amber-100 transition-colors">
+                        {item.status === 'AGREED' ? 'RE-OPEN' : 'DISCUSS'}
+                      </button>
+                    )}
+                  </div>
+                );
+              })()}
               <div ref={commentsEndRef} />
             </div>
           </div>

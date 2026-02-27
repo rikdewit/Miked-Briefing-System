@@ -88,6 +88,15 @@ function App() {
       }
     }
 
+    let pendingEdits: Partial<BriefItem> | undefined;
+    if (actualNewStatus === 'AGREED' && item.status === 'PENDING') {
+      const lastMeaningful = [...item.comments].reverse()
+        .find(c => c.type === 'ITEM_REVISION' || c.type === 'STATUS_CHANGE');
+      if (lastMeaningful?.type === 'ITEM_REVISION' && lastMeaningful.pendingUpdates) {
+        pendingEdits = lastMeaningful.pendingUpdates;
+      }
+    }
+
     postSystemUpdate({
       role: currentUserRole,
       timestamp: new Date().toISOString(),
@@ -102,14 +111,18 @@ function App() {
       id: `sys-${Date.now()}`,
       author: currentUserRole === 'BAND' ? 'Band' : 'Engineer',
       role: currentUserRole,
-      text: `changed status to ${actualNewStatus}${pendingConfirmationFrom ? ` (waiting for ${pendingConfirmationFrom})` : ''}`,
+      text: pendingConfirmationFrom
+        ? `agreed — waiting for ${pendingConfirmationFrom} confirmation`
+        : `changed status to ${actualNewStatus}`,
       timestamp: new Date().toISOString(),
       type: 'STATUS_CHANGE',
       newStatus: actualNewStatus,
+      waitingFor: pendingConfirmationFrom,
     };
 
     const newItem = {
       ...item,
+      ...(pendingEdits ?? {}),
       status: actualNewStatus,
       pendingConfirmationFrom,
       comments: [...item.comments, statusChangeComment],
@@ -249,6 +262,8 @@ function App() {
       itemSnapshot: { changes },
     });
 
+    const otherRole: Role = currentUserRole === 'BAND' ? 'ENGINEER' : 'BAND';
+
     const revisionComment: Comment = {
       id: `sys-${Date.now()}`,
       author: currentUserRole === 'BAND' ? 'Band' : 'Engineer',
@@ -257,23 +272,25 @@ function App() {
       timestamp: new Date().toISOString(),
       type: 'ITEM_REVISION',
       previousData,
-      newData
+      newData,
+      waitingFor: otherRole,
+      pendingUpdates: updates,
     };
 
-    setItems(prev => prev.map(i => 
-      i.id === id ? { 
-        ...i, 
-        ...updates,
-        status: 'DISCUSSING', // Auto-switch to discussing on edit
+    setItems(prev => prev.map(i =>
+      i.id === id ? {
+        ...i,
+        status: 'PENDING',
+        pendingConfirmationFrom: otherRole,
         comments: [...i.comments, revisionComment]
       } : i
     ));
 
     if (selectedItem && selectedItem.id === id) {
-      setSelectedItem(prev => prev ? { 
-        ...prev, 
-        ...updates,
-        status: 'DISCUSSING',
+      setSelectedItem(prev => prev ? {
+        ...prev,
+        status: 'PENDING',
+        pendingConfirmationFrom: otherRole,
         comments: [...prev.comments, revisionComment]
       } : null);
     }

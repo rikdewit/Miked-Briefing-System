@@ -32,6 +32,7 @@ export interface Comment {
   timestamp: string;
   type?: 'TEXT' | 'STATUS_CHANGE' | 'PROVIDER_CHANGE' | 'ITEM_REVISION';
   newStatus?: ItemStatus;
+  waitingFor?: Role; // Set when one party agreed but waiting for the other to confirm
   newProvider?: 'BAND' | 'VENUE' | 'ENGINEER';
   previousProvider?: 'BAND' | 'VENUE' | 'ENGINEER';
   previousData?: {
@@ -48,6 +49,7 @@ export interface Comment {
     specs?: BriefItem['specs'];
     provider?: BriefItem['provider'];
   };
+  pendingUpdates?: Partial<BriefItem>; // For ITEM_REVISION: proposed changes (not yet applied to item)
 }
 
 export interface BriefItem {

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { BriefItem, Role, Comment } from '../types';
 import { StatusBadge } from './Badges';
 import { ProviderBadge } from './ProviderBadge';
-import { Send, X, Edit2 } from 'lucide-react';
+import { Send, X, Edit2, CheckCircle, Clock } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface BriefItemDetailProps {
@@ -89,55 +89,57 @@ export const BriefItemDetail: React.FC<BriefItemDetailProps> = ({ item, role, on
           {/* Provider Selection for Engineer */}
           {/* Removed as provider selection is now in edit mode */}
 
-          <div className="flex gap-2">
-            {/* Engineer Actions */}
-            {role === 'ENGINEER' && (
-              <>
-                {/* Confirm if Discussing OR if Pending and waiting for Engineer */}
-                {(item.status === 'DISCUSSING' || (item.status === 'PENDING' && (item.pendingConfirmationFrom === 'ENGINEER' || (item.createdBy === 'BAND' && !item.pendingConfirmationFrom)))) && (
-                  <button 
-                    onClick={() => onUpdateStatus(item.id, 'AGREED')}
-                    className="flex-1 bg-[#141414] text-[#E4E3E0] py-2 px-4 font-mono text-sm hover:bg-emerald-700 transition-colors"
-                  >
-                    CONFIRM / AGREE
-                  </button>
+          {(() => {
+            const lastMeaningfulComment = [...item.comments].reverse().find(c => c.type === 'ITEM_REVISION' || c.type === 'STATUS_CHANGE');
+            const pendingFromEdit = lastMeaningfulComment?.type === 'ITEM_REVISION';
+            return (
+              <div className="flex gap-2">
+                {/* Engineer Actions */}
+                {role === 'ENGINEER' && (
+                  <>
+                    {(item.status === 'DISCUSSING' || (item.status === 'PENDING' && (item.pendingConfirmationFrom === 'ENGINEER' || (item.createdBy === 'BAND' && !item.pendingConfirmationFrom)))) && (
+                      <button
+                        onClick={() => onUpdateStatus(item.id, 'AGREED')}
+                        className="flex-1 bg-[#141414] text-[#E4E3E0] py-2 px-4 font-mono text-sm hover:bg-emerald-700 transition-colors"
+                      >
+                        {pendingFromEdit ? 'ACCEPT CHANGES' : 'CONFIRM / AGREE'}
+                      </button>
+                    )}
+                    {(item.status === 'PENDING' || item.status === 'AGREED') && (
+                      <button
+                        onClick={() => onUpdateStatus(item.id, 'DISCUSSING')}
+                        className="flex-1 bg-transparent border border-[#141414] text-[#141414] py-2 px-4 font-mono text-sm hover:bg-amber-100 transition-colors"
+                      >
+                        {item.status === 'AGREED' ? 'RE-OPEN' : 'DISCUSS'}
+                      </button>
+                    )}
+                  </>
                 )}
-                {/* Discuss if Pending (waiting for anyone) or Agreed */}
-                {(item.status === 'PENDING' || item.status === 'AGREED') && (
-                  <button 
-                    onClick={() => onUpdateStatus(item.id, 'DISCUSSING')}
-                    className="flex-1 bg-transparent border border-[#141414] text-[#141414] py-2 px-4 font-mono text-sm hover:bg-amber-100 transition-colors"
-                  >
-                    {item.status === 'AGREED' ? 'RE-OPEN' : 'DISCUSS'}
-                  </button>
-                )}
-              </>
-            )}
 
-            {/* Band Actions */}
-            {role === 'BAND' && (
-              <>
-                {/* Confirm if Discussing OR if Pending and waiting for Band */}
-                {(item.status === 'DISCUSSING' || (item.status === 'PENDING' && (item.pendingConfirmationFrom === 'BAND' || (item.createdBy === 'ENGINEER' && !item.pendingConfirmationFrom)))) && (
-                  <button 
-                    onClick={() => onUpdateStatus(item.id, 'AGREED')}
-                    className="flex-1 bg-[#141414] text-[#E4E3E0] py-2 px-4 font-mono text-sm hover:bg-emerald-700 transition-colors"
-                  >
-                    CONFIRM / AGREE
-                  </button>
+                {/* Band Actions */}
+                {role === 'BAND' && (
+                  <>
+                    {(item.status === 'DISCUSSING' || (item.status === 'PENDING' && (item.pendingConfirmationFrom === 'BAND' || (item.createdBy === 'ENGINEER' && !item.pendingConfirmationFrom)))) && (
+                      <button
+                        onClick={() => onUpdateStatus(item.id, 'AGREED')}
+                        className="flex-1 bg-[#141414] text-[#E4E3E0] py-2 px-4 font-mono text-sm hover:bg-emerald-700 transition-colors"
+                      >
+                        {pendingFromEdit ? 'ACCEPT CHANGES' : 'CONFIRM / AGREE'}
+                      </button>
+                    )}
+                    {(item.status === 'PENDING' || item.status === 'AGREED') && (
+                      <button
+                        onClick={() => onUpdateStatus(item.id, 'DISCUSSING')}
+                        className="flex-1 bg-transparent border border-[#141414] text-[#141414] py-2 px-4 font-mono text-sm hover:bg-amber-100 transition-colors"
+                      >
+                        {item.status === 'AGREED' ? 'RE-OPEN' : 'DISCUSS'}
+                      </button>
+                    )}
+                  </>
                 )}
-                {/* Discuss if Pending (waiting for anyone) or Agreed */}
-                {(item.status === 'PENDING' || item.status === 'AGREED') && (
-                  <button 
-                    onClick={() => onUpdateStatus(item.id, 'DISCUSSING')}
-                    className="flex-1 bg-transparent border border-[#141414] text-[#141414] py-2 px-4 font-mono text-sm hover:bg-amber-100 transition-colors"
-                  >
-                    {item.status === 'AGREED' ? 'RE-OPEN' : 'DISCUSS'}
-                  </button>
-                )}
-              </>
-            )}
-          </div>
+              </div>
+            );
+          })()}
         </div>
 
         {/* Details */}
@@ -180,17 +182,53 @@ export const BriefItemDetail: React.FC<BriefItemDetailProps> = ({ item, role, on
             {item.comments.length === 0 && (
               <p className="font-mono text-xs text-center opacity-40 py-4">No comments yet.</p>
             )}
-            {item.comments.map((comment) => {
+            {item.comments.map((comment, index) => {
+              // Skip STATUS_CHANGE to AGREED if it's part of a revision block
+              if (comment.type === 'STATUS_CHANGE' && comment.newStatus === 'AGREED') {
+                const prevComment = index > 0 ? item.comments[index - 1] : null;
+                if (prevComment?.type === 'ITEM_REVISION') {
+                  return null; // Skip rendering, it will be part of the revision block
+                }
+              }
+
               if (comment.type === 'STATUS_CHANGE') {
+                // First party agreed — waiting for the other
+                if (comment.waitingFor) {
+                  return (
+                    <div key={comment.id} className="flex justify-center my-3">
+                      <div className="w-full max-w-[85%] bg-amber-50 border border-amber-300 px-4 py-3 flex items-start gap-3">
+                        <Clock className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
+                        <div>
+                          <p className="text-xs font-mono font-bold text-amber-800 uppercase tracking-wide">{comment.author} agrees</p>
+                          <p className="text-[11px] font-mono text-amber-700 mt-0.5">Waiting for {comment.waitingFor} confirmation</p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+                // Both parties agreed (standalone, not after revision)
+                if (comment.newStatus === 'AGREED') {
+                  return (
+                    <div key={comment.id} className="flex justify-center my-3">
+                      <div className="w-full max-w-[85%] bg-emerald-50 border border-emerald-300 px-4 py-3 flex items-start gap-3">
+                        <CheckCircle className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
+                        <div>
+                          <p className="text-xs font-mono font-bold text-emerald-800 uppercase tracking-wide">{comment.author} confirmed</p>
+                          <p className="text-[11px] font-mono text-emerald-700 mt-0.5">Both parties agreed</p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+                // Re-open / DISCUSSING / other status transitions — small pill
                 return (
                   <div key={comment.id} className="flex justify-center my-2">
                     <div className={`px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider border ${
-                      comment.newStatus === 'AGREED' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' :
                       comment.newStatus === 'DISCUSSING' ? 'bg-amber-100 text-amber-800 border-amber-200' :
                       comment.newStatus === 'PENDING' ? 'bg-neutral-100 text-neutral-600 border-neutral-200' :
                       'bg-red-100 text-red-800 border-red-200'
                     }`}>
-                      {comment.author} marked as {comment.newStatus}
+                      {comment.author} {comment.newStatus === 'DISCUSSING' ? 're-opened for discussion' : `marked as ${comment.newStatus}`}
                     </div>
                   </div>
                 );
@@ -212,6 +250,9 @@ export const BriefItemDetail: React.FC<BriefItemDetailProps> = ({ item, role, on
 
               if (comment.type === 'ITEM_REVISION') {
                 const isOwn = comment.role === role;
+                const nextComment = index < item.comments.length - 1 ? item.comments[index + 1] : null;
+                const isAgreed = nextComment?.type === 'STATUS_CHANGE' && nextComment?.newStatus === 'AGREED';
+
                 return (
                   <div key={comment.id} className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'} my-4 w-full`}>
                     <div className={`border border-[#141414] p-3 w-full max-w-[85%] text-xs font-mono ${isOwn ? 'bg-[#141414]/5' : 'bg-white'}`}>
@@ -279,6 +320,17 @@ export const BriefItemDetail: React.FC<BriefItemDetailProps> = ({ item, role, on
                           </div>
                         )}
                       </div>
+                      {isAgreed && nextComment ? (
+                        <div className="mt-3 pt-2 border-t border-emerald-500/30 flex items-center gap-1.5 text-[10px] font-mono text-emerald-700 font-bold">
+                          <CheckCircle className="w-3 h-3" />
+                          {nextComment.author} agreed to changes
+                        </div>
+                      ) : comment.waitingFor && (
+                        <div className="mt-3 pt-2 border-t border-[#141414]/10 flex items-center gap-1.5 text-[10px] font-mono text-amber-700">
+                          <Clock className="w-3 h-3" />
+                          Awaiting {comment.waitingFor} confirmation
+                        </div>
+                      )}
                     </div>
                     <span className="font-mono text-[10px] mt-1 opacity-50">
                       {comment.author} updated brief • {new Date(comment.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
