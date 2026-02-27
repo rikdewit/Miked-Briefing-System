@@ -53,7 +53,7 @@ export const BriefList: React.FC<BriefListProps> = ({ items, selectedItem, onSel
         >
           <div>Status</div>
           <div>Provider</div>
-          <div>Item / Description</div>
+          <div>Item</div>
           <div className="hidden sm:block">Requested by</div>
           <div></div>
         </div>
