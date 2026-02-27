@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BriefItem, Role, Comment } from '../types';
 import { StatusBadge } from './Badges';
 import { ProviderBadge } from './ProviderBadge';
@@ -17,6 +17,24 @@ interface BriefItemDetailProps {
 
 export const BriefItemDetail: React.FC<BriefItemDetailProps> = ({ item, role, onClose, onUpdateStatus, onUpdateProvider, onAddComment, onEdit }) => {
   const [newComment, setNewComment] = useState('');
+  const commentsEndRef = useRef<HTMLDivElement>(null);
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  const discussionScrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    commentsEndRef.current?.scrollIntoView();
+  }, [item.comments]);
+
+  useEffect(() => {
+    const el = sidebarRef.current;
+    if (!el) return;
+    const handler = (e: WheelEvent) => {
+      if (discussionScrollRef.current?.contains(e.target as Node)) return;
+      e.preventDefault();
+    };
+    el.addEventListener('wheel', handler, { passive: false });
+    return () => el.removeEventListener('wheel', handler);
+  }, []);
 
   const handleSubmitComment = (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +45,8 @@ export const BriefItemDetail: React.FC<BriefItemDetailProps> = ({ item, role, on
   };
 
   return (
-    <motion.div 
+    <motion.div
+      ref={sidebarRef}
       initial={{ x: '100%' }}
       animate={{ x: 0 }}
       exit={{ x: '100%' }}
@@ -51,7 +70,8 @@ export const BriefItemDetail: React.FC<BriefItemDetailProps> = ({ item, role, on
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6 space-y-8">
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="p-6 space-y-8 shrink-0">
         {/* Status Actions */}
         <div className="bg-white/50 p-4 border border-[#141414]">
           <div className="flex justify-between items-center mb-4">
@@ -151,10 +171,12 @@ export const BriefItemDetail: React.FC<BriefItemDetailProps> = ({ item, role, on
           </div>
         </div>
 
+        </div>{/* end fixed sections */}
+
         {/* Discussion */}
-        <div>
-          <h3 className="font-serif-italic text-sm opacity-50 uppercase tracking-wider mb-4 border-b border-[#141414] pb-1">Discussion Log</h3>
-          <div className="space-y-4">
+        <div className="flex flex-col flex-1 overflow-hidden">
+          <h3 className="font-serif-italic text-sm opacity-50 uppercase tracking-wider mb-4 border-b border-[#141414] pb-1 shrink-0 px-6">Discussion Log</h3>
+          <div ref={discussionScrollRef} className="space-y-4 overflow-y-auto flex-1 px-6 pb-6">
             {item.comments.length === 0 && (
               <p className="font-mono text-xs text-center opacity-40 py-4">No comments yet.</p>
             )}
@@ -265,9 +287,13 @@ export const BriefItemDetail: React.FC<BriefItemDetailProps> = ({ item, role, on
                 );
               }
 
+              const bubbleStyle = comment.role === 'BAND'
+                ? 'bg-indigo-100 text-indigo-900 border-indigo-300'
+                : 'bg-cyan-100 text-cyan-900 border-cyan-300';
+
               return (
                 <div key={comment.id} className={`flex flex-col ${comment.role === role ? 'items-end' : 'items-start'}`}>
-                  <div className={`max-w-[85%] p-3 border border-[#141414] ${comment.role === role ? 'bg-[#141414] text-[#E4E3E0]' : 'bg-white'}`}>
+                  <div className={`max-w-[85%] p-3 border ${bubbleStyle}`}>
                     <p className="text-sm">{comment.text}</p>
                   </div>
                   <span className="font-mono text-[10px] mt-1 opacity-50">
@@ -276,9 +302,10 @@ export const BriefItemDetail: React.FC<BriefItemDetailProps> = ({ item, role, on
                 </div>
               );
             })}
+            <div ref={commentsEndRef} />
           </div>
         </div>
-      </div>
+      </div>{/* end flex-1 flex flex-col */}
 
       {/* Input */}
       <div className="p-4 border-t border-[#141414] bg-[#E4E3E0]">
