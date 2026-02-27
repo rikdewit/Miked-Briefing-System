@@ -48,7 +48,7 @@ export const BriefList: React.FC<BriefListProps> = ({ items, selectedItem, onSel
         <div
           className="bg-[#E4E3E0] grid gap-2 pl-8 pr-3 py-2 border-b border-[#141414] text-xs font-mono uppercase items-center"
           style={{
-            gridTemplateColumns: '130px 90px 1fr 70px 24px'
+            gridTemplateColumns: '110px 110px 1fr 70px 24px'
           }}
         >
           <div>Status</div>
@@ -109,7 +109,7 @@ export const BriefList: React.FC<BriefListProps> = ({ items, selectedItem, onSel
                               : 'hover:bg-neutral-300'
                           }`}
                           style={{
-                            gridTemplateColumns: '130px 90px 1fr 70px 24px'
+                            gridTemplateColumns: '110px 110px 1fr 70px 24px'
                           }}
                         >
                           {/* Status Icon */}

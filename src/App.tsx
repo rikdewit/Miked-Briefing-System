@@ -280,7 +280,16 @@ function App() {
           <h1 className="text-lg font-bold tracking-tighter font-mono hidden md:block">
             TECH<span className="text-emerald-500">RIDER</span>
           </h1>
-          
+
+          {/* Reset */}
+          <button
+            onClick={handleResetData}
+            title="Reset Data"
+            className="p-1.5 pr-1 hover:bg-red-100 rounded-md transition-colors group"
+          >
+            <RefreshCw className="w-3.5 h-3.5 opacity-40 group-hover:opacity-100 group-hover:text-red-500" />
+          </button>
+
           {/* Role Toggle */}
           <div className="flex items-center gap-2 bg-[#141414]/5 px-2 py-1 rounded-lg border border-[#141414]/5">
             <span className="text-[10px] font-mono opacity-40 uppercase hidden sm:inline">Role:</span>
@@ -307,15 +316,6 @@ function App() {
               ENG
             </button>
           </div>
-
-          {/* Reset */}
-          <button
-            onClick={handleResetData}
-            title="Reset Data"
-            className="p-1.5 hover:bg-red-100 rounded-md transition-colors group"
-          >
-            <RefreshCw className="w-3.5 h-3.5 opacity-40 group-hover:opacity-100 group-hover:text-red-500" />
-          </button>
 
           <div className="h-4 w-px bg-[#141414]/10 hidden sm:block" />
           
