@@ -11,15 +11,16 @@ export const StatusBadge = ({ item }: { item: BriefItem }) => {
   };
 
   const icons = {
-    PENDING: <Clock className="w-3 h-3" />,
-    DISCUSSING: <MessageCircle className="w-3 h-3" />,
-    AGREED: <CheckCircle2 className="w-3 h-3" />,
-    REJECTED: <AlertCircle className="w-3 h-3" />,
+    PENDING: <Clock className="w-3 h-3 mr-1" />,
+    DISCUSSING: <MessageCircle className="w-3 h-3 mr-1" />,
+    AGREED: <CheckCircle2 className="w-3 h-3 mr-1" />,
+    REJECTED: <AlertCircle className="w-3 h-3 mr-1" />,
   };
 
   return (
-    <span className={`inline-flex items-center justify-center px-2 py-1 rounded-full border ${styles[item.status]}`}>
+    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-mono border ${styles[item.status]}`}>
       {icons[item.status]}
+      {item.status}
     </span>
   );
 };

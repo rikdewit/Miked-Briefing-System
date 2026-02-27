@@ -22,18 +22,32 @@ export const BriefList: React.FC<BriefListProps> = ({ items, selectedItem, onSel
 
   return (
     <div className="w-full">
-      {/* Toolbar */}
-      <div className="sticky top-0 bg-[#E4E3E0] z-20 flex justify-between items-center px-4 py-3 border-b border-[#141414]/10">
-        <div className="text-xs font-mono uppercase tracking-wider opacity-60">
-          {items.length} Items
+      {/* Sticky header group — toolbar + column labels together to avoid gap */}
+      <div className="sticky top-0 z-20">
+        {/* Toolbar */}
+        <div className="bg-[#E4E3E0] flex justify-end items-center px-4 py-3 border-b border-[#141414]/10">
+          <button
+            onClick={onAddItem}
+            className="flex items-center gap-2 bg-[#141414] text-[#E4E3E0] px-3 py-1.5 font-mono text-xs hover:bg-opacity-90 transition-opacity"
+          >
+            <Plus className="w-3 h-3" />
+            NEW
+          </button>
         </div>
-        <button
-          onClick={onAddItem}
-          className="flex items-center gap-2 bg-[#141414] text-[#E4E3E0] px-3 py-1.5 font-mono text-xs hover:bg-opacity-90 transition-opacity"
+
+        {/* Column Headers */}
+        <div
+          className="bg-[#D9D8D5] grid gap-2 px-3 py-2 border-b border-[#141414]/10 text-xs font-mono uppercase items-center"
+          style={{
+            gridTemplateColumns: '130px 90px 1fr 70px 24px'
+          }}
         >
-          <Plus className="w-3 h-3" />
-          NEW
-        </button>
+          <div className="flex justify-center">Status</div>
+          <div className="flex justify-center">Provider</div>
+          <div>Item / Description</div>
+          <div className="text-right hidden sm:block">By</div>
+          <div></div>
+        </div>
       </div>
 
       {/* Grouped Sections */}
@@ -62,37 +76,40 @@ export const BriefList: React.FC<BriefListProps> = ({ items, selectedItem, onSel
                           e.stopPropagation();
                           onSelectItem(item);
                         }}
-                        className={`grid grid-cols-12 gap-3 px-4 py-2.5 transition-colors cursor-pointer group items-center ${
+                        className={`grid gap-2 px-3 py-3 transition-colors cursor-pointer group items-center ${
                           isSelected
                             ? 'bg-[#141414] text-[#E4E3E0]'
                             : 'hover:bg-neutral-300'
                         }`}
+                        style={{
+                          gridTemplateColumns: '130px 90px 1fr 70px 24px'
+                        }}
                       >
                         {/* Status Icon */}
-                        <div className="col-span-1 flex justify-center">
+                        <div className="flex justify-center flex-shrink-0">
                           <StatusBadge item={item} />
                         </div>
 
                         {/* Provider Icon */}
-                        <div className="col-span-1 flex justify-center">
+                        <div className="flex justify-center flex-shrink-0">
                           <ProviderBadge provider={item.provider} />
                         </div>
 
                         {/* Title + Description */}
-                        <div className="col-span-8">
-                          <div className="font-bold font-mono text-xs leading-tight">{item.title}</div>
+                        <div className="min-w-0">
+                          <div className="font-bold font-mono text-xs leading-tight truncate">{item.title}</div>
                           <div className={`text-xs leading-tight truncate ${isSelected ? 'opacity-70' : 'opacity-60 group-hover:opacity-80'}`}>
                             {item.description}
                           </div>
                         </div>
 
                         {/* Requested By (abbreviated) */}
-                        <div className="col-span-1 font-mono text-xs opacity-70 group-hover:opacity-100 text-right">
+                        <div className="font-mono text-xs opacity-70 group-hover:opacity-100 text-right flex-shrink-0 hidden sm:block">
                           {item.requestedBy.split(' ')[0]}
                         </div>
 
                         {/* Action Arrow */}
-                        <div className="col-span-1 flex justify-end">
+                        <div className="flex justify-end flex-shrink-0">
                           <ChevronRight className={`w-4 h-4 transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} />
                         </div>
                       </div>
