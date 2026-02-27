@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { BriefItem, MOCK_ITEMS, Role, Comment } from './types';
+import { BriefItem, MOCK_ITEMS, MOCK_GLOBAL_MESSAGES, Role, Comment, ChatMessage } from './types';
 import { BriefList } from './components/BriefList';
-import { BriefItemDetail } from './components/BriefItemDetail';
 import { ShowSpec } from './components/ShowSpec';
-import { EditItemPanel } from './components/EditItemPanel';
-import { NewItemPanel } from './components/NewItemPanel';
-import { LayoutDashboard, FileText, Settings, UserCircle2, Activity, RefreshCw, Truck, UserCog } from 'lucide-react';
+import { RefreshCw, Truck, UserCog } from 'lucide-react';
+import { GlobalChat } from './components/GlobalChat';
 import { AnimatePresence, motion } from 'motion/react';
 
 function App() {
@@ -32,66 +30,93 @@ function App() {
     setIsResetDialogOpen(false);
   };
 
+  const [globalMessages, setGlobalMessages] = useState<ChatMessage[]>(() => {
+    const saved = localStorage.getItem('globalMessages');
+    return saved ? JSON.parse(saved) : MOCK_GLOBAL_MESSAGES;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('globalMessages', JSON.stringify(globalMessages));
+  }, [globalMessages]);
+
+
+  const handleAddGlobalMessage = (text: string) => {
+    const msg: ChatMessage = {
+      id: `chat-${Date.now()}`,
+      author: currentUserRole === 'BAND' ? 'You (Band)' : 'You (Eng)',
+      role: currentUserRole,
+      text,
+      timestamp: new Date().toISOString(),
+    };
+    setGlobalMessages(prev => [...prev, msg]);
+  };
+
+  const postSystemUpdate = (update: Omit<ChatMessage, 'id' | 'author' | 'text' | 'isSystemUpdate'>) => {
+    const msg: ChatMessage = {
+      id: `sys-chat-${Date.now()}`,
+      author: currentUserRole === 'BAND' ? 'Band' : 'Engineer',
+      text: '',
+      isSystemUpdate: true,
+      ...update,
+    };
+    setGlobalMessages(prev => [...prev, msg]);
+  };
+
   const [selectedItem, setSelectedItem] = useState<BriefItem | null>(null);
-  const [activeTab, setActiveTab] = useState<'BRIEF' | 'SPEC'>('BRIEF');
   const [currentUserRole, setCurrentUserRole] = useState<Role>('BAND');
   const [isNewItemPanelOpen, setIsNewItemPanelOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<BriefItem | null>(null);
 
   const handleUpdateStatus = (id: string, newStatus: BriefItem['status']) => {
-    setItems(prev => prev.map(item => {
-      if (item.id !== id) return item;
+    const item = items.find(i => i.id === id);
+    if (!item) return;
 
-      let updatedItem = { ...item };
-      let actualNewStatus = newStatus;
-      let pendingConfirmationFrom: Role | undefined = undefined;
+    let actualNewStatus = newStatus;
+    let pendingConfirmationFrom: Role | undefined = undefined;
 
-      // Logic for Agreement Flow
-      if (newStatus === 'AGREED') {
-        if (item.status === 'DISCUSSING') {
-          // If discussing, first move to PENDING waiting for other party
-          actualNewStatus = 'PENDING';
-          pendingConfirmationFrom = currentUserRole === 'BAND' ? 'ENGINEER' : 'BAND';
-        } else if (item.status === 'PENDING') {
-          // If pending, check if we are the one confirming
-          if (item.pendingConfirmationFrom === currentUserRole || 
-              (item.createdBy && item.createdBy !== currentUserRole && !item.pendingConfirmationFrom)) {
-            actualNewStatus = 'AGREED';
-            pendingConfirmationFrom = undefined;
-          } else {
-             // Should not happen if UI is correct, but safe fallback
-             return item;
-          }
+    if (newStatus === 'AGREED') {
+      if (item.status === 'DISCUSSING') {
+        actualNewStatus = 'PENDING';
+        pendingConfirmationFrom = currentUserRole === 'BAND' ? 'ENGINEER' : 'BAND';
+      } else if (item.status === 'PENDING') {
+        if (item.pendingConfirmationFrom === currentUserRole ||
+            (item.createdBy && item.createdBy !== currentUserRole && !item.pendingConfirmationFrom)) {
+          actualNewStatus = 'AGREED';
+        } else {
+          return;
         }
-      } else if (newStatus === 'DISCUSSING') {
-        // Reset confirmation if moving back to discussion
-        pendingConfirmationFrom = undefined;
       }
+    }
 
-      const statusChangeComment: Comment = {
-        id: `sys-${Date.now()}`,
-        author: currentUserRole === 'BAND' ? 'Band' : 'Engineer',
-        role: currentUserRole,
-        text: `changed status to ${actualNewStatus}${pendingConfirmationFrom ? ` (waiting for ${pendingConfirmationFrom})` : ''}`,
-        timestamp: new Date().toISOString(),
-        type: 'STATUS_CHANGE',
-        newStatus: actualNewStatus
-      };
+    postSystemUpdate({
+      role: currentUserRole,
+      timestamp: new Date().toISOString(),
+      itemId: id,
+      itemTitle: item.title,
+      itemCategory: item.category,
+      updateType: 'STATUS_CHANGE',
+      itemSnapshot: { previousStatus: item.status, newStatus: actualNewStatus },
+    });
 
-      const newItem = {
-        ...updatedItem,
-        status: actualNewStatus,
-        pendingConfirmationFrom,
-        comments: [...item.comments, statusChangeComment]
-      };
+    const statusChangeComment: Comment = {
+      id: `sys-${Date.now()}`,
+      author: currentUserRole === 'BAND' ? 'Band' : 'Engineer',
+      role: currentUserRole,
+      text: `changed status to ${actualNewStatus}${pendingConfirmationFrom ? ` (waiting for ${pendingConfirmationFrom})` : ''}`,
+      timestamp: new Date().toISOString(),
+      type: 'STATUS_CHANGE',
+      newStatus: actualNewStatus,
+    };
 
-      // Update selected item if it matches
-      if (selectedItem && selectedItem.id === id) {
-        setSelectedItem(newItem);
-      }
+    const newItem = {
+      ...item,
+      status: actualNewStatus,
+      pendingConfirmationFrom,
+      comments: [...item.comments, statusChangeComment],
+    };
 
-      return newItem;
-    }));
+    setItems(prev => prev.map(i => i.id === id ? newItem : i));
+    if (selectedItem?.id === id) setSelectedItem(newItem);
   };
 
   const handleUpdateProvider = (id: string, provider: BriefItem['provider']) => {
@@ -129,20 +154,33 @@ function App() {
       return newComments;
     };
 
-    setItems(prev => prev.map(item => 
-      item.id === id ? { 
-        ...item, 
+    const existingItem = items.find(i => i.id === id);
+    if (existingItem) {
+      postSystemUpdate({
+        role: currentUserRole,
+        timestamp: new Date().toISOString(),
+        itemId: id,
+        itemTitle: existingItem.title,
+        itemCategory: existingItem.category,
+        updateType: 'PROVIDER_CHANGE',
+        itemSnapshot: { previousProvider: existingItem.provider, newProvider: provider },
+      });
+    }
+
+    setItems(prev => prev.map(item =>
+      item.id === id ? {
+        ...item,
         provider,
-        status: 'DISCUSSING', // Auto-switch to discussing on provider change
+        status: 'DISCUSSING',
         comments: getUpdatedComments(item, provider)
       } : item
     ));
 
     if (selectedItem && selectedItem.id === id) {
-      setSelectedItem(prev => prev ? { 
-        ...prev, 
+      setSelectedItem(prev => prev ? {
+        ...prev,
         provider,
-        status: 'DISCUSSING', // Auto-switch to discussing on provider change
+        status: 'DISCUSSING',
         comments: getUpdatedComments(prev, provider)
       } : null);
     }
@@ -200,6 +238,16 @@ function App() {
     }
 
     if (changes.length === 0) return;
+
+    postSystemUpdate({
+      role: currentUserRole,
+      timestamp: new Date().toISOString(),
+      itemId: id,
+      itemTitle: updates.title ?? item.title,
+      itemCategory: updates.category ?? item.category,
+      updateType: 'ITEM_REVISION',
+      itemSnapshot: { changes },
+    });
 
     const revisionComment: Comment = {
       id: `sys-${Date.now()}`,
@@ -324,9 +372,9 @@ function App() {
           </p>
         </div>
 
-        {/* Right: Reset */}
+        {/* Right */}
         <div className="flex items-center gap-3 md:gap-6">
-           <div className="hidden md:block text-right font-mono text-[10px] opacity-40 leading-tight">
+          <div className="hidden md:block text-right font-mono text-[10px] opacity-40 leading-tight">
             <div>AFKE FLAVIANA</div>
             <div>THE SPOKEN QUINTET TOUR</div>
           </div>
@@ -335,88 +383,55 @@ function App() {
       </header>
 
       {/* Main Content */}
-      <main 
-        className="flex-1 flex flex-col overflow-hidden relative"
-        onClick={handleBackgroundClick}
-      >
-        <div className="flex-1 overflow-y-auto pb-24">
-          <BriefList 
-            items={items} 
-            selectedItem={selectedItem}
-            onSelectItem={(item) => {
-              // Toggle logic: if clicking the already selected item, close it.
-              if (selectedItem?.id === item.id) {
+      <div className="flex-1 flex overflow-hidden">
+        <main
+          className="flex-1 flex flex-col overflow-hidden relative"
+          onClick={handleBackgroundClick}
+        >
+          <div className="flex-1 overflow-y-auto pb-24">
+            <BriefList
+              items={items}
+              selectedItem={selectedItem}
+              onSelectItem={(item) => {
+                if (selectedItem?.id === item.id) {
+                  setSelectedItem(null);
+                  setIsNewItemPanelOpen(false);
+                } else {
+                  setSelectedItem(item);
+                  setIsNewItemPanelOpen(false);
+                }
+              }}
+              role={currentUserRole}
+              onAddItem={() => {
+                setIsNewItemPanelOpen(true);
                 setSelectedItem(null);
-                setIsNewItemPanelOpen(false);
-              } else {
-                setSelectedItem(item);
-                setIsNewItemPanelOpen(false);
-              }
-            }} 
-            role={currentUserRole}
-            onAddItem={() => {
-              setIsNewItemPanelOpen(true);
-              setSelectedItem(null);
-            }}
-          />
-        </div>
-      </main>
-
-      {/* Detail Panel / Modal */}
-      <AnimatePresence mode="wait">
-        {selectedItem && !isNewItemPanelOpen && !editingItem && (
-          <motion.div 
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed right-0 top-0 bottom-0 z-40 h-full shadow-2xl"
-          >
-            <BriefItemDetail 
-              item={selectedItem} 
-              role={currentUserRole}
-              onClose={() => setSelectedItem(null)}
-              onUpdateStatus={handleUpdateStatus}
-              onUpdateProvider={handleUpdateProvider}
-              onAddComment={handleAddComment}
-              onEdit={() => setEditingItem(selectedItem)}
-            />
-          </motion.div>
-        )}
-        {isNewItemPanelOpen && (
-          <motion.div 
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed right-0 top-0 bottom-0 z-40 h-full shadow-2xl"
-          >
-            <NewItemPanel 
-              onClose={() => setIsNewItemPanelOpen(false)}
-              onSave={handleAddItem}
-              role={currentUserRole}
-            />
-          </motion.div>
-        )}
-        {editingItem && (
-          <motion.div 
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed right-0 top-0 bottom-0 z-40 h-full shadow-2xl"
-          >
-            <EditItemPanel 
-              item={editingItem}
-              onClose={() => setEditingItem(null)}
-              onSave={(id, updates) => {
-                handleEditItem(id, updates);
-                setEditingItem(null);
               }}
             />
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        </main>
+
+        <GlobalChat
+          messages={globalMessages}
+          role={currentUserRole}
+          onSendMessage={handleAddGlobalMessage}
+          onSelectItem={(itemId) => {
+            const item = items.find(i => i.id === itemId);
+            if (item) setSelectedItem(item);
+          }}
+          selectedItem={selectedItem}
+          onCloseItem={() => setSelectedItem(null)}
+          onAddComment={handleAddComment}
+          onUpdateStatus={handleUpdateStatus}
+          onUpdateProvider={handleUpdateProvider}
+          onEdit={() => setEditingItem(selectedItem)}
+          editingItem={editingItem}
+          onSaveEdit={(id, updates) => { handleEditItem(id, updates); setEditingItem(null); }}
+          onCloseEdit={() => setEditingItem(null)}
+          isNewItemOpen={isNewItemPanelOpen}
+          onSaveNew={handleAddItem}
+          onCloseNew={() => setIsNewItemPanelOpen(false)}
+        />
+      </div>
 
       {/* Reset Confirmation Modal */}
       <AnimatePresence>

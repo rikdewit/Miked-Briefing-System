@@ -1,5 +1,25 @@
 export type Role = 'BAND' | 'ENGINEER';
 
+export interface ChatMessage {
+  id: string;
+  author: string;
+  role: Role;
+  text: string;
+  timestamp: string;
+  isSystemUpdate?: boolean;
+  itemId?: string;
+  itemTitle?: string;
+  itemCategory?: Category;
+  updateType?: 'STATUS_CHANGE' | 'PROVIDER_CHANGE' | 'ITEM_REVISION';
+  itemSnapshot?: {
+    previousStatus?: ItemStatus;
+    newStatus?: ItemStatus;
+    previousProvider?: string;
+    newProvider?: string;
+    changes?: string[];
+  };
+}
+
 export type ItemStatus = 'PENDING' | 'DISCUSSING' | 'AGREED' | 'REJECTED';
 
 export type Category = 'MONITORING' | 'MICROPHONES' | 'PA' | 'BACKLINE' | 'LIGHTING' | 'STAGE' | 'POWER' | 'HOSPITALITY';
@@ -49,6 +69,63 @@ export interface BriefItem {
     notes?: string;
   };
 }
+
+export const MOCK_GLOBAL_MESSAGES: ChatMessage[] = [
+  {
+    id: 'g1',
+    author: 'Afke',
+    role: 'BAND',
+    text: 'Hi! Will there be a green room available for before the show?',
+    timestamp: '2023-10-26T09:28:00Z',
+  },
+  {
+    id: 'g2',
+    author: 'Engineer',
+    role: 'ENGINEER',
+    text: "Yes, there's a small room backstage. I'll add hospitality items to the brief.",
+    timestamp: '2023-10-26T09:33:00Z',
+  },
+  {
+    id: 'g3',
+    author: 'System',
+    role: 'BAND',
+    text: '',
+    timestamp: '2023-10-26T10:00:00Z',
+    isSystemUpdate: true,
+    itemId: '7',
+    itemTitle: 'Bass Amp',
+    itemCategory: 'BACKLINE',
+    updateType: 'STATUS_CHANGE',
+    itemSnapshot: { previousStatus: 'PENDING', newStatus: 'DISCUSSING' },
+  },
+  {
+    id: 'g4',
+    author: 'Lester',
+    role: 'BAND',
+    text: 'Just flagged the bass amp — hoping the venue has something decent.',
+    timestamp: '2023-10-26T10:01:00Z',
+  },
+  {
+    id: 'g5',
+    author: 'System',
+    role: 'ENGINEER',
+    text: '',
+    timestamp: '2023-10-26T10:16:00Z',
+    isSystemUpdate: true,
+    itemId: '4',
+    itemTitle: 'Sax Monitor',
+    itemCategory: 'MONITORING',
+    updateType: 'STATUS_CHANGE',
+    itemSnapshot: { previousStatus: 'PENDING', newStatus: 'DISCUSSING' },
+  },
+  {
+    id: 'g6',
+    author: 'Engineer',
+    role: 'ENGINEER',
+    text: 'Heads up — I can only do mono monitors tonight. Should be fine for sax.',
+    timestamp: '2023-10-26T10:17:00Z',
+  },
+];
 
 export const MOCK_ITEMS: BriefItem[] = [
   // Afke (Vocals)
