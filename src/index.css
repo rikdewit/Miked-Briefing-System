@@ -16,6 +16,18 @@
     color: var(--color-tech-ink);
     font-family: var(--font-sans);
   }
+
+  * {
+    scrollbar-color: #b0aeaa var(--color-tech-bg);
+  }
+
+  ::-webkit-scrollbar {
+    background-color: var(--color-tech-bg);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: #b0aeaa;
+  }
 }
 
 .font-serif-italic {
