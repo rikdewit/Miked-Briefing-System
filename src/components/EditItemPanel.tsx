@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
 import { BriefItem, Category } from '../types';
 import { X, Save } from 'lucide-react';
+import {
+  TextInput,
+  TextareaInput,
+  CategorySelect,
+  ProviderSelect,
+  SpecsSection,
+} from './FormFields';
 
 interface EditItemPanelProps {
   item: BriefItem;
@@ -42,127 +49,28 @@ export const EditItemPanel: React.FC<EditItemPanelProps> = ({ item, onClose, onS
 
       {/* Form Content */}
       <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
-        <div>
-          <label className="block text-xs font-mono uppercase opacity-60 mb-1">Title</label>
-          <input 
-            type="text" 
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full bg-white border border-[#141414] p-2 font-mono text-sm focus:outline-none focus:border-emerald-500"
-            required
-          />
-        </div>
+        <TextInput
+          label="Title"
+          value={title}
+          onChange={setTitle}
+          required
+        />
 
-        <div className="grid grid-cols-1 gap-4">
-          <div>
-            <label className="block text-xs font-mono uppercase opacity-60 mb-1">Category</label>
-            <select 
-              value={category}
-              onChange={(e) => setCategory(e.target.value as Category)}
-              className="w-full bg-white border border-[#141414] p-2 font-mono text-sm"
-            >
-              <option value="MICROPHONES">MICROPHONES</option>
-              <option value="MONITORING">MONITORING</option>
-              <option value="PA">PA</option>
-              <option value="BACKLINE">BACKLINE</option>
-              <option value="LIGHTING">LIGHTING</option>
-              <option value="STAGE">STAGE</option>
-              <option value="POWER">POWER</option>
-              <option value="HOSPITALITY">HOSPITALITY</option>
-            </select>
-          </div>
-        </div>
+        <CategorySelect value={category} onChange={setCategory} />
 
-        <div>
-          <label className="block text-xs font-mono uppercase opacity-60 mb-1">Provider</label>
-          <div className="flex gap-1 bg-black/5 p-1 rounded">
-            <button 
-              type="button"
-              onClick={() => setProvider('BAND')}
-              className={`flex-1 py-2 text-[10px] font-mono rounded text-center transition-all ${
-                provider === 'BAND' 
-                  ? 'bg-indigo-100 text-indigo-800 font-bold shadow-sm' 
-                  : 'text-neutral-500 hover:bg-black/5'
-              }`}
-            >
-              BAND
-            </button>
-            <button 
-              type="button"
-              onClick={() => setProvider('VENUE')}
-              className={`flex-1 py-2 text-[10px] font-mono rounded text-center transition-all ${
-                provider === 'VENUE' 
-                  ? 'bg-neutral-100 text-neutral-800 font-bold shadow-sm' 
-                  : 'text-neutral-500 hover:bg-black/5'
-              }`}
-            >
-              VENUE
-            </button>
-            <button 
-              type="button"
-              onClick={() => setProvider('ENGINEER')}
-              className={`flex-1 py-2 text-[10px] font-mono rounded text-center transition-all ${
-                provider === 'ENGINEER' 
-                  ? 'bg-cyan-100 text-cyan-800 font-bold shadow-sm' 
-                  : 'text-neutral-500 hover:bg-black/5'
-              }`}
-            >
-              ENGINEER
-            </button>
-          </div>
-        </div>
+        <ProviderSelect value={provider} onChange={setProvider} />
 
-        <div>
-          <label className="block text-xs font-mono uppercase opacity-60 mb-1">Description</label>
-          <textarea 
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full bg-white border border-[#141414] p-2 font-mono text-sm focus:outline-none focus:border-emerald-500 min-h-[100px] resize-none"
-            required
-          />
-        </div>
+        <TextareaInput
+          label="Description"
+          value={description}
+          onChange={setDescription}
+          required
+        />
 
-        <div className="pt-4 border-t border-[#141414]/10">
-          <h3 className="font-serif-italic text-sm opacity-50 uppercase tracking-wider mb-3">Specifications</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-mono uppercase opacity-60 mb-1">Make</label>
-              <input 
-                type="text" 
-                value={specs.make || ''}
-                onChange={(e) => setSpecs({...specs, make: e.target.value})}
-                className="w-full bg-white border border-[#141414] p-2 font-mono text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-mono uppercase opacity-60 mb-1">Model</label>
-              <input 
-                type="text" 
-                value={specs.model || ''}
-                onChange={(e) => setSpecs({...specs, model: e.target.value})}
-                className="w-full bg-white border border-[#141414] p-2 font-mono text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-mono uppercase opacity-60 mb-1">Quantity</label>
-              <input 
-                type="number" 
-                value={specs.quantity || ''}
-                onChange={(e) => setSpecs({...specs, quantity: parseInt(e.target.value) || undefined})}
-                className="w-full bg-white border border-[#141414] p-2 font-mono text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-mono uppercase opacity-60 mb-1">Notes</label>
-              <input 
-                type="text" 
-                value={specs.notes || ''}
-                onChange={(e) => setSpecs({...specs, notes: e.target.value})}
-                className="w-full bg-white border border-[#141414] p-2 font-mono text-sm"
-              />
-            </div>
-          </div>
-        </div>
+        <SpecsSection
+          specs={specs}
+          onSpecsChange={setSpecs}
+        />
       </form>
 
       {/* Footer Actions */}

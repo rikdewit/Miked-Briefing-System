@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
 import { BriefItem, Category, Role } from '../types';
-import { X, Save, Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import { X, Save } from 'lucide-react';
+import {
+  TextInput,
+  TextareaInput,
+  CategorySelect,
+  ProviderSelect,
+  SpecsSection,
+} from './FormFields';
 
 interface NewItemPanelProps {
   role: Role;
@@ -13,6 +20,7 @@ export const NewItemPanel: React.FC<NewItemPanelProps> = ({ role, onClose, onSav
   const [category, setCategory] = useState<Category>('MICROPHONES');
   const [description, setDescription] = useState('');
   const [requestedBy, setRequestedBy] = useState(role === 'BAND' ? 'Band Member' : 'Engineer');
+  const [provider, setProvider] = useState<BriefItem['provider']>(role === 'BAND' ? 'BAND' : 'ENGINEER');
   const [specs, setSpecs] = useState<BriefItem['specs']>({});
   const [showSpecs, setShowSpecs] = useState(false);
 
@@ -23,7 +31,7 @@ export const NewItemPanel: React.FC<NewItemPanelProps> = ({ role, onClose, onSav
       category,
       description,
       requestedBy,
-      provider: role === 'BAND' ? 'BAND' : 'ENGINEER',
+      provider,
       specs
     });
   };
@@ -43,108 +51,39 @@ export const NewItemPanel: React.FC<NewItemPanelProps> = ({ role, onClose, onSav
 
       {/* Form Content */}
       <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
-        <div>
-          <label className="block text-xs font-mono uppercase opacity-60 mb-1">Title</label>
-          <input 
-            required
-            value={title}
-            onChange={e => setTitle(e.target.value)}
-            className="w-full bg-white border border-[#141414] p-2 font-mono text-sm focus:outline-none focus:border-emerald-500"
-            placeholder="e.g. Bass DI"
-            autoFocus
-          />
-        </div>
+        <TextInput
+          label="Title"
+          value={title}
+          onChange={setTitle}
+          placeholder="e.g. Bass DI"
+          required
+          autoFocus
+        />
 
-        <div className="grid grid-cols-1 gap-4">
-          <div>
-            <label className="block text-xs font-mono uppercase opacity-60 mb-1">Category</label>
-            <select 
-              value={category}
-              onChange={e => setCategory(e.target.value as Category)}
-              className="w-full bg-white border border-[#141414] p-2 font-mono text-sm focus:outline-none"
-            >
-              <option value="MICROPHONES">MICROPHONES</option>
-              <option value="MONITORING">MONITORING</option>
-              <option value="PA">PA</option>
-              <option value="BACKLINE">BACKLINE</option>
-              <option value="LIGHTING">LIGHTING</option>
-              <option value="STAGE">STAGE</option>
-              <option value="POWER">POWER</option>
-              <option value="HOSPITALITY">HOSPITALITY</option>
-            </select>
-          </div>
-        </div>
+        <CategorySelect value={category} onChange={setCategory} />
 
-        <div>
-          <label className="block text-xs font-mono uppercase opacity-60 mb-1">Description</label>
-          <textarea 
-            required
-            value={description}
-            onChange={e => setDescription(e.target.value)}
-            className="w-full bg-white border border-[#141414] p-2 font-mono text-sm focus:outline-none min-h-[100px] resize-none"
-            placeholder="Describe requirements..."
-          />
-        </div>
+        <ProviderSelect value={provider} onChange={setProvider} />
 
-        <div>
-          <label className="block text-xs font-mono uppercase opacity-60 mb-1">Requested By</label>
-          <input 
-            value={requestedBy}
-            onChange={e => setRequestedBy(e.target.value)}
-            className="w-full bg-white border border-[#141414] p-2 font-mono text-sm focus:outline-none"
-          />
-        </div>
+        <TextareaInput
+          label="Description"
+          value={description}
+          onChange={setDescription}
+          placeholder="Describe requirements..."
+          required
+        />
 
-        <div className="pt-4 border-t border-[#141414]/10">
-          <button
-            type="button"
-            onClick={() => setShowSpecs(!showSpecs)}
-            className="flex items-center gap-2 text-xs font-mono uppercase opacity-60 hover:opacity-100 transition-opacity mb-3"
-          >
-            {showSpecs ? <ChevronUp className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
-            {showSpecs ? 'Hide Technical Details' : 'Add Technical Details'}
-          </button>
-          
-          {showSpecs && (
-            <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
-              <div>
-                <label className="block text-xs font-mono uppercase opacity-60 mb-1">Make</label>
-                <input 
-                  value={specs?.make || ''}
-                  onChange={e => setSpecs({...specs, make: e.target.value})}
-                  className="w-full bg-white border border-[#141414] p-2 font-mono text-sm"
-                  placeholder="e.g. Shure"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-mono uppercase opacity-60 mb-1">Model</label>
-                <input 
-                  value={specs?.model || ''}
-                  onChange={e => setSpecs({...specs, model: e.target.value})}
-                  className="w-full bg-white border border-[#141414] p-2 font-mono text-sm"
-                  placeholder="e.g. SM58"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-mono uppercase opacity-60 mb-1">Quantity</label>
-                <input 
-                  type="number"
-                  value={specs?.quantity || ''}
-                  onChange={e => setSpecs({...specs, quantity: parseInt(e.target.value) || undefined})}
-                  className="w-full bg-white border border-[#141414] p-2 font-mono text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-mono uppercase opacity-60 mb-1">Notes</label>
-                <input 
-                  value={specs?.notes || ''}
-                  onChange={e => setSpecs({...specs, notes: e.target.value})}
-                  className="w-full bg-white border border-[#141414] p-2 font-mono text-sm"
-                />
-              </div>
-            </div>
-          )}
-        </div>
+        <TextInput
+          label="Requested By"
+          value={requestedBy}
+          onChange={setRequestedBy}
+        />
+
+        <SpecsSection
+          specs={specs}
+          onSpecsChange={setSpecs}
+          collapsed={!showSpecs}
+          onToggle={() => setShowSpecs(!showSpecs)}
+        />
       </form>
 
       {/* Footer Actions */}
