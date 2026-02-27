@@ -175,8 +175,8 @@ export const BriefItemDetail: React.FC<BriefItemDetailProps> = ({ item, role, on
 
         {/* Discussion */}
         <div className="flex flex-col flex-1 overflow-hidden">
-          <h3 className="font-serif-italic text-sm opacity-50 uppercase tracking-wider mb-4 border-b border-[#141414] pb-1 shrink-0 px-6">Discussion Log</h3>
-          <div ref={discussionScrollRef} className="space-y-4 overflow-y-auto flex-1 px-6 pb-6">
+          <h3 className="font-serif-italic text-sm opacity-50 uppercase tracking-wider border-b border-[#141414] pb-1 shrink-0 px-6">Discussion Log</h3>
+          <div ref={discussionScrollRef} className="space-y-4 overflow-y-auto flex-1 px-6 pt-4 pb-6">
             {item.comments.length === 0 && (
               <p className="font-mono text-xs text-center opacity-40 py-4">No comments yet.</p>
             )}
