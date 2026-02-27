@@ -69,25 +69,23 @@ export const BriefList: React.FC<BriefListProps> = ({ items, selectedItem, onSel
             <div key={cat} className="bg-[#E4E3E0]">
               {/* Category Header */}
               <div
-                className="px-4 py-2.5 border-b border-[#141414]/5 flex items-center justify-between cursor-pointer hover:bg-neutral-300 transition-colors select-none"
+                className="px-4 py-2.5 border-b border-[#141414]/5 flex items-center gap-3 cursor-pointer hover:bg-neutral-300 transition-colors select-none"
                 onClick={() => toggleCategory(cat)}
               >
-                <div className="flex items-center gap-3">
-                  <span className="text-xs font-mono uppercase font-bold tracking-widest">
-                    {cat}
-                  </span>
-                  {isCollapsed && categoryItems.length > 0 && (
-                    <div className="flex items-center gap-1">
-                      {[...new Set(categoryItems.map(i => i.status))].map(status => (
-                        <span key={status} className="inline-flex items-center"><StatusCircle status={status} /></span>
-                      ))}
-                    </div>
-                  )}
-                </div>
                 {isCollapsed
-                  ? <ChevronRight className="w-3 h-3 opacity-40" />
-                  : <ChevronDown className="w-3 h-3 opacity-40" />
+                  ? <ChevronRight className="w-3 h-3 opacity-40 shrink-0" />
+                  : <ChevronDown className="w-3 h-3 opacity-40 shrink-0" />
                 }
+                <span className="text-xs font-mono uppercase font-bold tracking-widest">
+                  {cat}
+                </span>
+                {isCollapsed && categoryItems.length > 0 && (
+                  <div className="flex items-center gap-1">
+                    {[...new Set(categoryItems.map(i => i.status))].map(status => (
+                      <span key={status} className="inline-flex items-center"><StatusCircle status={status} /></span>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Category Items */}
