@@ -1,6 +1,6 @@
 import React from 'react';
 import { BriefItem, Category } from '../types';
-import { Truck, Package, UserCog, Plus, ChevronUp } from 'lucide-react';
+import { Music, Package, UserCog, Plus, ChevronUp } from 'lucide-react';
 
 interface TextInputProps {
   label: string;
@@ -105,7 +105,7 @@ export const ProviderSelect: React.FC<ProviderSelectProps> = ({ value, onChange 
             : 'px-4 py-2.5 text-[10px] font-mono opacity-50 hover:opacity-100'
         }`}
       >
-        <Truck className="w-4 h-4" />
+        <Music className="w-4 h-4 -mb-0.5" />
         {value === 'BAND' && <span className="ml-1">BAND</span>}
       </button>
       <button

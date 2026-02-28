@@ -1,6 +1,6 @@
 import React from 'react';
 import { BriefItem } from '../types';
-import { Package, Truck, UserCog } from 'lucide-react';
+import { Package, Music, UserCog } from 'lucide-react';
 
 export const ProviderBadge = ({ provider }: { provider?: BriefItem['provider'] }) => {
   if (!provider) return null;
@@ -12,7 +12,7 @@ export const ProviderBadge = ({ provider }: { provider?: BriefItem['provider'] }
   };
 
   const icons = {
-    BAND: <Truck className="w-3 h-3 mr-1" />,
+    BAND: <Music className="w-3 h-3 mr-1 -mb-0.5" />,
     VENUE: <Package className="w-3 h-3 mr-1" />,
     ENGINEER: <UserCog className="w-3 h-3 mr-1" />,
   };

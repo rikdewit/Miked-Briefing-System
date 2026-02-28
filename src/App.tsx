@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BriefItem, MOCK_ITEMS, MOCK_GLOBAL_MESSAGES, Role, Comment, ChatMessage } from './types';
 import { BriefList } from './components/BriefList';
 import { ShowSpec } from './components/ShowSpec';
-import { RefreshCw, Truck, UserCog } from 'lucide-react';
+import { RefreshCw, Music, UserCog } from 'lucide-react';
 import { GlobalChat } from './components/GlobalChat';
 import { AnimatePresence, motion } from 'motion/react';
 
@@ -366,7 +366,7 @@ function App() {
                   : 'opacity-50 hover:opacity-100'
               }`}
             >
-              <Truck className="w-3 h-3 mr-1" />
+              <Music className="w-3 h-3 mr-1 -mb-0.5" />
               BAND
             </button>
             <button
