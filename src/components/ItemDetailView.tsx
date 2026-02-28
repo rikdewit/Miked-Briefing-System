@@ -252,7 +252,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                             }`}
                           >
                             {ac.role === 'BAND' ? <Truck className="w-3 h-3" /> : <UserCog className="w-3 h-3" />}
-                            {ac.author}
+                            {ac.role === role ? 'You' : ac.author}
                           </div>
                         ))}
                       </div>
@@ -343,6 +343,11 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                     }
                     j++;
                   }
+
+                  // Check if this is the last revision and it's been agreed to
+                  const isLastRevision = comment.id === lastRevisionComment?.id;
+                  const isAgreed = isLastRevision && item.status === 'AGREED' && agreementCommentsForRevision.length > 0;
+
                   return (
                     <div
                       key={comment.id}
@@ -350,8 +355,10 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                       className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'} my-4 w-full`}
                     >
                       <div
-                        className={`border border-[#141414] p-3 w-full max-w-[85%] text-xs font-mono ${
-                          isOwn ? 'bg-[#141414]/5' : 'bg-white'
+                        className={`relative border p-3 w-full max-w-[85%] text-xs font-mono ${
+                          isAgreed
+                            ? 'border-emerald-500 border-2 bg-emerald-50'
+                            : `border border-[#141414] ${isOwn ? 'bg-[#141414]/5' : 'bg-white'}`
                         }`}
                       >
                         <div className="space-y-3 opacity-70">
@@ -441,10 +448,15 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                             </button>
                           )}
                       </div>
-                      <span className="font-mono text-[10px] mt-1 opacity-50">
-                        {comment.author} updated brief •{' '}
+                      <div className="flex items-center gap-1.5 font-mono text-[10px] mt-1 opacity-50">
+                        <span className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
+                          comment.role === 'BAND' ? 'bg-indigo-200 text-indigo-700' : 'bg-cyan-200 text-cyan-700'
+                        }`}>
+                          {comment.role === 'BAND' ? <Truck className="w-3 h-3" /> : <UserCog className="w-3 h-3" />}
+                        </span>
+                        {comment.role === role ? 'You' : comment.author} updated brief •{' '}
                         {new Date(comment.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </span>
+                      </div>
                       {agreementCommentsForRevision.length > 0 && (
                         <div
                           className={`relative flex flex-col gap-0.5 mt-2 ${
@@ -473,7 +485,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                                   )}
                                 </span>
                                 <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />
-                                <span className="font-mono text-xs font-semibold">{ac.author} agreed</span>
+                                <span className="font-mono text-xs font-semibold">{ac.role === role ? 'You' : ac.author} agreed</span>
                               </div>
                               <span className="font-mono text-[10px] opacity-50 mt-0.5 ml-8">
                                 {new Date(ac.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -494,10 +506,15 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                     <div className={`max-w-[85%] p-3 border ${bubbleStyle}`}>
                       <p className="text-sm">{comment.text}</p>
                     </div>
-                    <span className="font-mono text-[10px] mt-1 opacity-50">
-                      {comment.author} •{' '}
+                    <div className="flex items-center gap-1.5 font-mono text-[10px] mt-1 opacity-50">
+                      <span className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
+                        comment.role === 'BAND' ? 'bg-indigo-200 text-indigo-700' : 'bg-cyan-200 text-cyan-700'
+                      }`}>
+                        {comment.role === 'BAND' ? <Truck className="w-3 h-3" /> : <UserCog className="w-3 h-3" />}
+                      </span>
+                      {comment.role === role ? 'You' : comment.author} •{' '}
                       {new Date(comment.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
+                    </div>
                   </div>
                 );
               });

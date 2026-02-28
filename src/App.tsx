@@ -62,7 +62,7 @@ function App() {
     setGlobalMessages(prev => [...prev, msg]);
   };
 
-  const [selectedItem, setSelectedItem] = useState<BriefItem | null>(null);
+  const [selectedItem, setSelectedItem] = useState<BriefItem | null>(items[0] ?? null);
   const [currentUserRole, setCurrentUserRole] = useState<Role>('BAND');
   const [isNewItemPanelOpen, setIsNewItemPanelOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<BriefItem | null>(null);
