@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { BriefItem, ChatMessage, Role, ItemStatus, Category } from '../types';
+import { BriefItem, ChatMessage, Role, ItemStatus, Category, Comment } from '../types';
 import { StatusBadge } from './Badges';
 import { ProviderBadge } from './ProviderBadge';
 import {
   TextInput, TextareaInput, CategorySelect, ProviderSelect, SpecsSection,
 } from './FormFields';
-import { Send, MessageSquare, ChevronLeft, Edit2, Save } from 'lucide-react';
+import { Send, MessageSquare, ChevronLeft, Edit2, Save, CheckCircle, Truck, UserCog } from 'lucide-react';
 
 type Filter = 'ALL' | 'CHAT' | 'UPDATES';
 
@@ -283,12 +283,12 @@ export const GlobalChat: React.FC<GlobalChatProps> = ({
               )}
               {(() => {
                 const lastRevisionId = [...item.comments].reverse().find(c => c.type === 'ITEM_REVISION')?.id;
-                return item.comments.map((comment) => {
+                return item.comments.map((comment, index) => {
                 if (comment.type === 'STATUS_CHANGE') {
+                  if (comment.newStatus === 'AGREED') return null;
                   return (
                     <div key={comment.id} className="flex justify-center my-2">
                       <div className={`px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider border ${
-                        comment.newStatus === 'AGREED' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' :
                         comment.newStatus === 'DISCUSSING' ? 'bg-amber-100 text-amber-800 border-amber-200' :
                         comment.newStatus === 'PENDING' ? 'bg-neutral-100 text-neutral-600 border-neutral-200' :
                         'bg-red-100 text-red-800 border-red-200'
@@ -313,6 +313,17 @@ export const GlobalChat: React.FC<GlobalChatProps> = ({
                 }
                 if (comment.type === 'ITEM_REVISION') {
                   const isOwn = comment.role === role;
+                  const agreementComments: Comment[] = [];
+                  let j = index + 1;
+                  while (j < item.comments.length) {
+                    const c = item.comments[j];
+                    if (c.type === 'STATUS_CHANGE' && c.newStatus === 'AGREED') {
+                      agreementComments.push(c);
+                    } else if (c.type === 'ITEM_REVISION' || (c.type === 'STATUS_CHANGE' && c.newStatus !== 'AGREED')) {
+                      break;
+                    }
+                    j++;
+                  }
                   return (
                     <div key={comment.id} className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'} my-4 w-full`}>
                       <div className={`border border-[#141414] p-3 w-full max-w-[85%] text-xs font-mono ${isOwn ? 'bg-[#141414]/5' : 'bg-white'}`}>
@@ -369,6 +380,27 @@ export const GlobalChat: React.FC<GlobalChatProps> = ({
                       <span className="font-mono text-[10px] mt-1 opacity-50">
                         {comment.author} updated brief • {new Date(comment.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
+                      {agreementComments.length > 0 && (
+                        <div className={`relative flex flex-col gap-0.5 mt-2 ${isOwn ? 'self-start' : 'self-end'}`}>
+                          <div className={`absolute top-0 bottom-0 w-0.5 bg-emerald-400 ${isOwn ? 'right-0' : 'left-0'}`} />
+                          {agreementComments.map(ac => (
+                            <div key={ac.id} className={`flex flex-col ${isOwn ? 'pr-3' : 'pl-3'}`}>
+                              <div className="flex items-center gap-2">
+                                <span className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
+                                  ac.role === 'BAND' ? 'bg-indigo-200 text-indigo-700' : 'bg-cyan-200 text-cyan-700'
+                                }`}>
+                                  {ac.role === 'BAND' ? <Truck className="w-3.5 h-3.5" /> : <UserCog className="w-3.5 h-3.5" />}
+                                </span>
+                                <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />
+                                <span className="font-mono text-xs font-semibold">{ac.author} agreed</span>
+                              </div>
+                              <span className="font-mono text-[10px] opacity-50 mt-0.5 ml-8">
+                                {new Date(ac.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   );
                 }
