@@ -33,6 +33,12 @@ export interface Comment {
   type?: 'TEXT' | 'STATUS_CHANGE' | 'PROVIDER_CHANGE' | 'ITEM_REVISION';
   newStatus?: ItemStatus;
   waitingFor?: Role; // Set when one party agreed but waiting for the other to confirm
+  agreement?: {
+    agreedBy: Role;
+    agreedAt: string;
+    isFirstAgreement?: boolean;
+    isFinalAgreement?: boolean;
+  };
   newProvider?: 'BAND' | 'VENUE' | 'ENGINEER';
   previousProvider?: 'BAND' | 'VENUE' | 'ENGINEER';
   previousData?: {
