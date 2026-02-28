@@ -29,45 +29,54 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
 }) => {
   const [text, setText] = useState('');
   const commentsEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     commentsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [item.comments]);
 
-  // Get all agreement comments (STATUS_CHANGE to AGREED)
-  const agreementComments = item.comments.filter(
-    c => c.type === 'STATUS_CHANGE' && c.newStatus === 'AGREED'
-  );
-  const agreedByRoles = Array.from(new Set(agreementComments.map(c => c.role)));
-  const firstAgreement = agreementComments[0];
-  const lastAgreement = agreementComments[agreementComments.length - 1];
-  const bothPartiesAgreed = agreedByRoles.length === 2;
+  const scrollToRevision = (commentId: string) => {
+    const el = scrollContainerRef.current?.querySelector(`#revision-${commentId}`);
+    el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
-  // Get the latest revision comment
+  // Get the latest revision comment first
   const lastRevisionComment = [...item.comments].reverse().find(c => c.type === 'ITEM_REVISION');
+  const lastRevisionIndex = lastRevisionComment
+    ? item.comments.findIndex(c => c.id === lastRevisionComment.id)
+    : -1;
+
+  // Get agreement comments scoped to the current revision cycle (after the latest revision)
+  const agreementComments = item.comments
+    .slice(lastRevisionIndex + 1)
+    .filter(c => c.type === 'STATUS_CHANGE' && c.newStatus === 'AGREED');
+  const agreedByRoles = Array.from(new Set(agreementComments.map(c => c.role)));
+  // Use item.status as source of truth: agreement is final when status is AGREED and there's a revision to have agreed on
+  const bothPartiesAgreed = item.status === 'AGREED' && lastRevisionComment !== undefined;
 
   // Per-field pending revision helpers for spec grid
-  const pendingProvider = lastRevisionComment?.previousData?.provider !== undefined
+  // Hide diffs when both parties have agreed — show current values only
+  const pendingProvider = !bothPartiesAgreed && lastRevisionComment?.previousData?.provider !== undefined
     ? { old: lastRevisionComment.previousData.provider, new: lastRevisionComment.newData?.provider }
     : null;
 
-  const pendingDescription = lastRevisionComment?.previousData?.description !== undefined
+  const pendingDescription = !bothPartiesAgreed && lastRevisionComment?.previousData?.description !== undefined
     ? { old: lastRevisionComment.previousData.description, new: lastRevisionComment.newData?.description }
     : null;
 
-  const pendingMake = lastRevisionComment?.previousData?.specs?.make !== undefined
+  const pendingMake = !bothPartiesAgreed && lastRevisionComment?.previousData?.specs?.make !== undefined
     ? { old: lastRevisionComment.previousData.specs.make, new: lastRevisionComment.newData?.specs?.make }
     : null;
 
-  const pendingModel = lastRevisionComment?.previousData?.specs?.model !== undefined
+  const pendingModel = !bothPartiesAgreed && lastRevisionComment?.previousData?.specs?.model !== undefined
     ? { old: lastRevisionComment.previousData.specs.model, new: lastRevisionComment.newData?.specs?.model }
     : null;
 
-  const pendingQuantity = lastRevisionComment?.previousData?.specs?.quantity !== undefined
+  const pendingQuantity = !bothPartiesAgreed && lastRevisionComment?.previousData?.specs?.quantity !== undefined
     ? { old: lastRevisionComment.previousData.specs.quantity, new: lastRevisionComment.newData?.specs?.quantity }
     : null;
 
-  const pendingNotes = lastRevisionComment?.previousData?.specs?.notes !== undefined
+  const pendingNotes = !bothPartiesAgreed && lastRevisionComment?.previousData?.specs?.notes !== undefined
     ? { old: lastRevisionComment.previousData.specs.notes, new: lastRevisionComment.newData?.specs?.notes }
     : null;
 
@@ -221,45 +230,50 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
           {/* Agreement summary + ACCEPT button — only when revision is pending */}
           {lastRevisionComment && (
             <div className="mt-4 pt-3 border-t border-[#141414]/20 space-y-2">
-              {agreementComments.length > 0 && (
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-mono text-[10px] opacity-60 uppercase tracking-wider">Confirmed by</span>
-                  <div className="flex gap-1.5">
-                    {agreementComments.map(ac => (
-                      <div
-                        key={ac.id}
-                        className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold ${
-                          ac.role === 'BAND' ? 'bg-indigo-100 text-indigo-700' : 'bg-cyan-100 text-cyan-700'
-                        }`}
-                      >
-                        {ac.role === 'BAND' ? <Truck className="w-3 h-3" /> : <UserCog className="w-3 h-3" />}
-                        {ac.author}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               {bothPartiesAgreed ? (
-                <div className="flex items-center gap-1.5 text-emerald-700">
-                  <CheckCircle className="w-3.5 h-3.5" />
-                  <span className="font-mono text-[10px] font-bold uppercase tracking-wider">
-                    All parties confirmed
-                  </span>
-                </div>
-              ) : item.pendingConfirmationFrom && !bothPartiesAgreed ? (
-                <div className="font-mono text-[10px] opacity-50 uppercase tracking-wider">
-                  Waiting for {item.pendingConfirmationFrom}
-                </div>
-              ) : null}
-
-              {lastRevisionComment.pendingUpdates && item.pendingConfirmationFrom === role && (
                 <button
-                  onClick={() => onUpdateStatus(item.id, 'AGREED')}
-                  className="mt-1 w-full bg-[#141414] text-[#E4E3E0] py-2 px-4 font-mono text-xs hover:bg-emerald-700 transition-colors"
+                  onClick={() => scrollToRevision(lastRevisionComment.id)}
+                  className="flex items-center gap-1.5 text-emerald-700 font-mono text-[10px] underline underline-offset-2 hover:opacity-70 transition-opacity"
                 >
-                  ACCEPT CHANGES
+                  <CheckCircle className="w-3.5 h-3.5" />
+                  View agreed revision in log
                 </button>
+              ) : (
+                <>
+                  {agreementComments.length > 0 && (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-mono text-[10px] opacity-60 uppercase tracking-wider">Confirmed by</span>
+                      <div className="flex gap-1.5">
+                        {agreementComments.map(ac => (
+                          <div
+                            key={ac.id}
+                            className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold ${
+                              ac.role === 'BAND' ? 'bg-indigo-100 text-indigo-700' : 'bg-cyan-100 text-cyan-700'
+                            }`}
+                          >
+                            {ac.role === 'BAND' ? <Truck className="w-3 h-3" /> : <UserCog className="w-3 h-3" />}
+                            {ac.author}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {item.pendingConfirmationFrom && !bothPartiesAgreed ? (
+                    <div className="font-mono text-[10px] opacity-50 uppercase tracking-wider">
+                      Waiting for {item.pendingConfirmationFrom}
+                    </div>
+                  ) : null}
+
+                  {lastRevisionComment.pendingUpdates && item.pendingConfirmationFrom === role && (
+                    <button
+                      onClick={() => onUpdateStatus(item.id, 'AGREED')}
+                      className="mt-1 w-full bg-[#141414] text-[#E4E3E0] py-2 px-4 font-mono text-xs hover:bg-emerald-700 transition-colors"
+                    >
+                      ACCEPT CHANGES
+                    </button>
+                  )}
+                </>
               )}
             </div>
           )}
@@ -270,7 +284,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
           <h3 className="font-serif-italic text-sm opacity-50 uppercase tracking-wider border-b border-[#141414] pb-1 shrink-0 px-6">
             Discussion Log
           </h3>
-          <div className="space-y-4 overflow-y-auto flex-1 px-6 pt-4 pb-4">
+          <div ref={scrollContainerRef} className="space-y-4 overflow-y-auto flex-1 px-6 pt-4 pb-4">
             {item.comments.length === 0 && (
               <p className="font-mono text-xs text-center opacity-40 py-4">No comments yet.</p>
             )}
@@ -332,6 +346,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                   return (
                     <div
                       key={comment.id}
+                      id={`revision-${comment.id}`}
                       className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'} my-4 w-full`}
                     >
                       <div
@@ -384,7 +399,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                               </div>
                             </div>
                           )}
-                          {comment.previousData?.description && comment.newData?.description && (
+                          {comment.previousData?.description !== undefined && comment.newData?.description !== undefined && (
                             <div className="flex flex-col gap-1">
                               <span className="opacity-50 text-[10px] uppercase">Description</span>
                               <div className="line-through opacity-50 italic pl-2 border-l-2 border-[#141414]/10">
