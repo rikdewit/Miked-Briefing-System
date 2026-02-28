@@ -43,6 +43,34 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
   const lastAgreement = agreementComments[agreementComments.length - 1];
   const bothPartiesAgreed = agreedByRoles.length === 2;
 
+  // Get the latest revision comment
+  const lastRevisionComment = [...item.comments].reverse().find(c => c.type === 'ITEM_REVISION');
+
+  // Per-field pending revision helpers for spec grid
+  const pendingProvider = lastRevisionComment?.previousData?.provider !== undefined
+    ? { old: lastRevisionComment.previousData.provider, new: lastRevisionComment.newData?.provider }
+    : null;
+
+  const pendingDescription = lastRevisionComment?.previousData?.description !== undefined
+    ? { old: lastRevisionComment.previousData.description, new: lastRevisionComment.newData?.description }
+    : null;
+
+  const pendingMake = lastRevisionComment?.previousData?.specs?.make !== undefined
+    ? { old: lastRevisionComment.previousData.specs.make, new: lastRevisionComment.newData?.specs?.make }
+    : null;
+
+  const pendingModel = lastRevisionComment?.previousData?.specs?.model !== undefined
+    ? { old: lastRevisionComment.previousData.specs.model, new: lastRevisionComment.newData?.specs?.model }
+    : null;
+
+  const pendingQuantity = lastRevisionComment?.previousData?.specs?.quantity !== undefined
+    ? { old: lastRevisionComment.previousData.specs.quantity, new: lastRevisionComment.newData?.specs?.quantity }
+    : null;
+
+  const pendingNotes = lastRevisionComment?.previousData?.specs?.notes !== undefined
+    ? { old: lastRevisionComment.previousData.specs.notes, new: lastRevisionComment.newData?.specs?.notes }
+    : null;
+
   const handleSubmitComment = (e: React.FormEvent) => {
     e.preventDefault();
     if (text.trim()) {
@@ -92,104 +120,150 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
         {/* Spec — fixed */}
         <div className="px-6 pt-4 pb-4 shrink-0">
           <div className="grid grid-cols-3 gap-4 font-mono text-sm">
+            {/* Provider */}
             <div className="col-span-1 opacity-60">Provider</div>
             <div className="col-span-2">
-              <ProviderBadge provider={item.provider} />
+              {pendingProvider ? (
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="opacity-40 line-through">
+                    <ProviderBadge provider={pendingProvider.old} />
+                  </span>
+                  <span className="text-[10px] opacity-40">→</span>
+                  <ProviderBadge provider={pendingProvider.new} />
+                </div>
+              ) : (
+                <ProviderBadge provider={item.provider} />
+              )}
             </div>
+
+            {/* Description */}
             <div className="col-span-1 opacity-60">Description</div>
-            <div className="col-span-2">{item.description}</div>
-            {item.specs?.make && (
+            <div className="col-span-2">
+              {pendingDescription ? (
+                <div className="flex flex-col gap-0.5">
+                  <span className="line-through opacity-40">{pendingDescription.old}</span>
+                  <span className="text-emerald-700 font-semibold">{pendingDescription.new}</span>
+                </div>
+              ) : (
+                item.description
+              )}
+            </div>
+
+            {/* Make */}
+            {(item.specs?.make || pendingMake) && (
               <>
                 <div className="col-span-1 opacity-60">Make</div>
-                <div className="col-span-2">{item.specs.make}</div>
+                <div className="col-span-2">
+                  {pendingMake ? (
+                    <div className="flex flex-col gap-0.5">
+                      <span className="line-through opacity-40">{pendingMake.old}</span>
+                      <span className="text-emerald-700 font-semibold">{pendingMake.new}</span>
+                    </div>
+                  ) : (
+                    item.specs?.make
+                  )}
+                </div>
               </>
             )}
-            {item.specs?.model && (
+
+            {/* Model */}
+            {(item.specs?.model || pendingModel) && (
               <>
                 <div className="col-span-1 opacity-60">Model</div>
-                <div className="col-span-2">{item.specs.model}</div>
+                <div className="col-span-2">
+                  {pendingModel ? (
+                    <div className="flex flex-col gap-0.5">
+                      <span className="line-through opacity-40">{pendingModel.old}</span>
+                      <span className="text-emerald-700 font-semibold">{pendingModel.new}</span>
+                    </div>
+                  ) : (
+                    item.specs?.model
+                  )}
+                </div>
               </>
             )}
-            {item.specs?.quantity && (
+
+            {/* Quantity */}
+            {(item.specs?.quantity || pendingQuantity) && (
               <>
                 <div className="col-span-1 opacity-60">Quantity</div>
-                <div className="col-span-2">{item.specs.quantity}</div>
+                <div className="col-span-2">
+                  {pendingQuantity ? (
+                    <div className="flex flex-col gap-0.5">
+                      <span className="line-through opacity-40">{pendingQuantity.old}</span>
+                      <span className="text-emerald-700 font-semibold">{pendingQuantity.new}</span>
+                    </div>
+                  ) : (
+                    item.specs?.quantity
+                  )}
+                </div>
               </>
             )}
-            {item.specs?.notes && (
+
+            {/* Notes */}
+            {(item.specs?.notes || pendingNotes) && (
               <>
                 <div className="col-span-1 opacity-60">Notes</div>
-                <div className="col-span-2">{item.specs.notes}</div>
+                <div className="col-span-2">
+                  {pendingNotes ? (
+                    <div className="flex flex-col gap-0.5">
+                      <span className="line-through opacity-40">{pendingNotes.old}</span>
+                      <span className="text-emerald-700 font-semibold">{pendingNotes.new}</span>
+                    </div>
+                  ) : (
+                    item.specs?.notes
+                  )}
+                </div>
               </>
             )}
           </div>
-        </div>
 
-        {/* Agreement Summary Box */}
-        {agreementComments.length > 0 && (
-          <div className="px-6 pb-4 shrink-0">
-            <div className="bg-emerald-50 border border-emerald-200 p-3 text-xs font-mono space-y-2">
-              <div className="font-bold text-emerald-900">Agreement Summary</div>
-
-              {/* Who agreed */}
-              <div className="flex items-center gap-2">
-                <span className="opacity-70">✓ Agreed:</span>
-                <div className="flex gap-1.5">
-                  {agreementComments.map(ac => (
-                    <div
-                      key={ac.id}
-                      className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                        ac.role === 'BAND'
-                          ? 'bg-indigo-200 text-indigo-700'
-                          : 'bg-cyan-200 text-cyan-700'
-                      }`}
-                    >
-                      {ac.role}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Waiting for (if applicable) */}
-              {item.pendingConfirmationFrom && !bothPartiesAgreed && (
-                <div className="flex items-center gap-2">
-                  <span className="opacity-70">⏳ Waiting:</span>
-                  <div className="px-2 py-0.5 rounded bg-amber-200 text-amber-700 text-[10px] font-bold">
-                    {item.pendingConfirmationFrom}
+          {/* Agreement summary + ACCEPT button — only when revision is pending */}
+          {lastRevisionComment && (
+            <div className="mt-4 pt-3 border-t border-[#141414]/20 space-y-2">
+              {agreementComments.length > 0 && (
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-mono text-[10px] opacity-60 uppercase tracking-wider">Confirmed by</span>
+                  <div className="flex gap-1.5">
+                    {agreementComments.map(ac => (
+                      <div
+                        key={ac.id}
+                        className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold ${
+                          ac.role === 'BAND' ? 'bg-indigo-100 text-indigo-700' : 'bg-cyan-100 text-cyan-700'
+                        }`}
+                      >
+                        {ac.role === 'BAND' ? <Truck className="w-3 h-3" /> : <UserCog className="w-3 h-3" />}
+                        {ac.author}
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
 
-              {/* Timestamps */}
-              {firstAgreement && lastAgreement && (
-                <div className="flex gap-2 text-[10px] opacity-60 flex-wrap">
-                  <span>
-                    First: {new Date(firstAgreement.timestamp).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </span>
-                  {!bothPartiesAgreed && (
-                    <span>
-                      • Latest: {new Date(lastAgreement.timestamp).toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </span>
-                  )}
-                </div>
-              )}
-
-              {/* Confirmation message */}
-              {bothPartiesAgreed && (
+              {bothPartiesAgreed ? (
                 <div className="flex items-center gap-1.5 text-emerald-700">
                   <CheckCircle className="w-3.5 h-3.5" />
-                  <span className="text-[10px] font-bold">All parties confirmed</span>
+                  <span className="font-mono text-[10px] font-bold uppercase tracking-wider">
+                    All parties confirmed
+                  </span>
                 </div>
+              ) : item.pendingConfirmationFrom && !bothPartiesAgreed ? (
+                <div className="font-mono text-[10px] opacity-50 uppercase tracking-wider">
+                  Waiting for {item.pendingConfirmationFrom}
+                </div>
+              ) : null}
+
+              {lastRevisionComment.pendingUpdates && item.pendingConfirmationFrom === role && (
+                <button
+                  onClick={() => onUpdateStatus(item.id, 'AGREED')}
+                  className="mt-1 w-full bg-[#141414] text-[#E4E3E0] py-2 px-4 font-mono text-xs hover:bg-emerald-700 transition-colors"
+                >
+                  ACCEPT CHANGES
+                </button>
               )}
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Discussion — scrollable */}
         <div className="flex flex-col flex-1 overflow-hidden">
