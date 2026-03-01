@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { BriefItem, Role, Comment } from '../types';
 import { StatusBadge } from './Badges';
 import { ProviderBadge } from './ProviderBadge';
-import { Send, ChevronLeft, Edit2, CheckCircle, Music, UserCog } from 'lucide-react';
+import { Send, ChevronLeft, Edit2, CheckCircle, Music, UserCog, RotateCcw } from 'lucide-react';
 
 interface ItemDetailViewProps {
   item: BriefItem;
@@ -503,6 +503,31 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                           ))}
                         </div>
                       )}
+                    </div>
+                  );
+                }
+                if (comment.isReopenExplanation) {
+                  const isOwnComment = comment.role === role;
+                  return (
+                    <div key={comment.id} className={`flex flex-col w-full my-1 ${isOwnComment ? 'items-end' : 'items-start'}`}>
+                      <div className={`relative flex flex-col gap-0.5 ${isOwnComment ? 'self-end' : 'self-start'}`}>
+                        <div className={`absolute top-0 bottom-0 w-0.5 bg-orange-400 ${isOwnComment ? 'right-0' : 'left-0'}`} />
+                        <div className={`flex flex-col ${isOwnComment ? 'pr-3' : 'pl-3'}`}>
+                          <div className="flex items-center gap-2">
+                            <span className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
+                              comment.role === 'BAND' ? 'bg-indigo-200 text-indigo-700' : 'bg-cyan-200 text-cyan-700'
+                            }`}>
+                              {comment.role === 'BAND' ? <Music className="w-3.5 h-3.5 -mb-0.5" /> : <UserCog className="w-3.5 h-3.5" />}
+                            </span>
+                            <RotateCcw className="w-5 h-5 shrink-0 text-orange-600" />
+                            <span className="font-mono text-xs font-semibold">{isOwnComment ? 'You' : (comment.role === 'BAND' ? 'Band' : 'Engineer')} reopened</span>
+                          </div>
+                          <p className="font-mono text-xs mt-0.5 ml-8 text-neutral-700">{comment.text}</p>
+                          <span className="font-mono text-[10px] opacity-50 mt-0.5 ml-8">
+                            {new Date(comment.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   );
                 }

@@ -56,6 +56,7 @@ export interface Comment {
     provider?: BriefItem['provider'];
   };
   pendingUpdates?: Partial<BriefItem>; // For ITEM_REVISION: proposed changes (not yet applied to item)
+  isReopenExplanation?: boolean; // For plain text comments explaining why spec was reopened
 }
 
 export interface BriefItem {

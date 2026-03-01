@@ -335,10 +335,40 @@ function App() {
   };
 
   const handleReopen = (id: string, message: string) => {
-    // Add to item discussion log
-    handleAddComment(id, message);
-    // Update status to REOPENED
-    handleUpdateStatus(id, 'REOPENED');
+    const item = items.find(i => i.id === id);
+    if (!item) return;
+
+    // Create explanation comment marked as reopen explanation
+    const explanationComment: Comment = {
+      id: `c${Date.now()}`,
+      author: currentUserRole === 'BAND' ? 'You (Band)' : 'You (Eng)',
+      role: currentUserRole,
+      text: message,
+      timestamp: new Date().toISOString(),
+      isReopenExplanation: true,
+    };
+
+    // Atomically update item with explanation and status change
+    const newItem = {
+      ...item,
+      status: 'REOPENED' as const,
+      pendingConfirmationFrom: undefined,
+      comments: [...item.comments, explanationComment],
+    };
+
+    setItems(prev => prev.map(i => i.id === id ? newItem : i));
+    if (selectedItem?.id === id) setSelectedItem(newItem);
+
+    // Post system update to global chat
+    postSystemUpdate({
+      role: currentUserRole,
+      timestamp: new Date().toISOString(),
+      itemId: id,
+      itemTitle: item.title,
+      itemCategory: item.category,
+      updateType: 'STATUS_CHANGE',
+      itemSnapshot: { previousStatus: item.status, newStatus: 'REOPENED' },
+    });
   };
 
   const pendingCount = items.filter(i => i.status === 'PENDING').length;
