@@ -85,6 +85,9 @@ function App() {
         } else {
           return;
         }
+      } else if (item.status === 'REOPENED') {
+        // When confirming from REOPENED state, go straight to AGREED (no re-confirmation needed)
+        actualNewStatus = 'AGREED';
       }
     }
 
@@ -95,6 +98,12 @@ function App() {
       if (lastMeaningful?.type === 'ITEM_REVISION' && lastMeaningful.pendingUpdates) {
         pendingEdits = lastMeaningful.pendingUpdates;
       }
+    }
+
+    // When transitioning to REOPENED, clear pendingConfirmationFrom
+    if (newStatus === 'REOPENED') {
+      actualNewStatus = 'REOPENED';
+      pendingConfirmationFrom = undefined;
     }
 
     postSystemUpdate({
@@ -113,7 +122,9 @@ function App() {
       role: currentUserRole,
       text: pendingConfirmationFrom
         ? `agreed — waiting for ${pendingConfirmationFrom} confirmation`
-        : `changed status to ${actualNewStatus}`,
+        : actualNewStatus === 'REOPENED'
+          ? 'reopened for discussion'
+          : `changed status to ${actualNewStatus}`,
       timestamp: new Date().toISOString(),
       type: 'STATUS_CHANGE',
       newStatus: actualNewStatus,
@@ -323,6 +334,13 @@ function App() {
     }
   };
 
+  const handleReopen = (id: string, message: string) => {
+    // Add to item discussion log
+    handleAddComment(id, message);
+    // Update status to REOPENED
+    handleUpdateStatus(id, 'REOPENED');
+  };
+
   const pendingCount = items.filter(i => i.status === 'PENDING').length;
   const discussingCount = items.filter(i => i.status === 'DISCUSSING').length;
   const agreedCount = items.filter(i => i.status === 'AGREED').length;
@@ -441,6 +459,7 @@ function App() {
           onUpdateStatus={handleUpdateStatus}
           onUpdateProvider={handleUpdateProvider}
           onEdit={() => setEditingItem(selectedItem)}
+          onReopen={handleReopen}
           editingItem={editingItem}
           onSaveEdit={(id, updates) => { handleEditItem(id, updates); setEditingItem(null); }}
           onCloseEdit={() => setEditingItem(null)}

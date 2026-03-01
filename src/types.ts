@@ -20,7 +20,7 @@ export interface ChatMessage {
   };
 }
 
-export type ItemStatus = 'PENDING' | 'DISCUSSING' | 'AGREED' | 'REJECTED';
+export type ItemStatus = 'PENDING' | 'DISCUSSING' | 'AGREED' | 'REOPENED' | 'REJECTED';
 
 export type Category = 'MONITORING' | 'MICROPHONES' | 'PA' | 'BACKLINE' | 'LIGHTING' | 'STAGE' | 'POWER' | 'HOSPITALITY';
 

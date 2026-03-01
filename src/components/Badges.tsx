@@ -1,12 +1,13 @@
 import React from 'react';
 import { BriefItem, ItemStatus, ItemType } from '../types';
-import { CheckCircle2, Circle, HelpCircle, AlertCircle, Clock, Check, MessageCircle } from 'lucide-react';
+import { CheckCircle2, Circle, HelpCircle, AlertCircle, Clock, Check, MessageCircle, RotateCcw } from 'lucide-react';
 
 export const StatusBadge = ({ item }: { item: BriefItem }) => {
   const styles = {
     PENDING: 'bg-neutral-200 text-neutral-600 border-neutral-400',
     DISCUSSING: 'bg-amber-100 text-amber-800 border-amber-300',
     AGREED: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+    REOPENED: 'bg-orange-100 text-orange-800 border-orange-300',
     REJECTED: 'bg-red-100 text-red-800 border-red-300',
   };
 
@@ -14,6 +15,7 @@ export const StatusBadge = ({ item }: { item: BriefItem }) => {
     PENDING: <Clock className="w-3 h-3 mr-1" />,
     DISCUSSING: <MessageCircle className="w-3 h-3 mr-1" />,
     AGREED: <CheckCircle2 className="w-3 h-3 mr-1" />,
+    REOPENED: <RotateCcw className="w-3 h-3 mr-1" />,
     REJECTED: <AlertCircle className="w-3 h-3 mr-1" />,
   };
 
@@ -34,6 +36,7 @@ export const StatusCircle = ({ status }: { status: BriefItem['status'] }) => {
     PENDING: 'bg-neutral-400',
     DISCUSSING: 'bg-amber-400',
     AGREED: 'bg-emerald-400',
+    REOPENED: 'bg-orange-400',
     REJECTED: 'bg-red-400',
   };
 

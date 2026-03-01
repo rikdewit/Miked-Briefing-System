@@ -20,6 +20,7 @@ interface GlobalChatProps {
   onUpdateStatus: (id: string, status: BriefItem['status']) => void;
   onUpdateProvider: (id: string, provider: BriefItem['provider']) => void;
   onEdit: () => void;
+  onReopen: (id: string, message: string) => void;
   // Edit mode
   editingItem?: BriefItem | null;
   onSaveEdit: (id: string, updates: Partial<BriefItem>) => void;
@@ -198,7 +199,7 @@ const NewView: React.FC<{
 // ── Main component ────────────────────────────────────────────────────────────
 export const GlobalChat: React.FC<GlobalChatProps> = ({
   messages, role, onSendMessage, onSelectItem,
-  selectedItem, onCloseItem, onAddComment, onUpdateStatus, onUpdateProvider, onEdit,
+  selectedItem, onCloseItem, onAddComment, onUpdateStatus, onUpdateProvider, onEdit, onReopen,
   editingItem, onSaveEdit, onCloseEdit,
   isNewItemOpen, onSaveNew, onCloseNew,
 }) => {
@@ -235,6 +236,7 @@ export const GlobalChat: React.FC<GlobalChatProps> = ({
         onAddComment={onAddComment}
         onUpdateStatus={onUpdateStatus}
         onEdit={onEdit}
+        onReopen={onReopen}
       />
     );
   }

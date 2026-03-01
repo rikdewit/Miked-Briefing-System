@@ -11,6 +11,7 @@ interface ItemDetailViewProps {
   onAddComment: (id: string, text: string) => void;
   onUpdateStatus: (id: string, status: BriefItem['status']) => void;
   onEdit: () => void;
+  onReopen: (id: string, message: string) => void;
 }
 
 const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -26,8 +27,10 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
   onAddComment,
   onUpdateStatus,
   onEdit,
+  onReopen,
 }) => {
   const [text, setText] = useState('');
+  const [isReopenPromptOpen, setIsReopenPromptOpen] = useState(false);
   const commentsEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -51,8 +54,9 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
     .slice(lastRevisionIndex + 1)
     .filter(c => c.type === 'STATUS_CHANGE' && c.newStatus === 'AGREED');
   const agreedByRoles = Array.from(new Set(agreementComments.map(c => c.role)));
-  // Use item.status as source of truth: agreement is final when status is AGREED and there's a revision to have agreed on
-  const bothPartiesAgreed = item.status === 'AGREED' && lastRevisionComment !== undefined;
+  // Use item.status as source of truth: agreement is final when status is AGREED or REOPENED and there's a revision to have agreed on
+  // When REOPENED, we still show the agreed spec values (no diffs)
+  const bothPartiesAgreed = (item.status === 'AGREED' || item.status === 'REOPENED') && lastRevisionComment !== undefined;
 
   // Per-field pending revision helpers for spec grid
   // Hide diffs when both parties have agreed — show current values only
@@ -79,14 +83,6 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
   const pendingNotes = !bothPartiesAgreed && lastRevisionComment?.previousData?.specs?.notes !== undefined
     ? { old: lastRevisionComment.previousData.specs.notes, new: lastRevisionComment.newData?.specs?.notes }
     : null;
-
-  const handleSubmitComment = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (text.trim()) {
-      onAddComment(item.id, text.trim());
-      setText('');
-    }
-  };
 
   return (
     <Shell>
@@ -230,7 +226,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
           {/* Agreement summary + ACCEPT button — only when revision is pending */}
           {lastRevisionComment && (
             <div className="mt-4 pt-3 border-t border-[#141414]/20 space-y-2">
-              {bothPartiesAgreed ? (
+              {bothPartiesAgreed && item.status === 'AGREED' ? (
                 <button
                   onClick={() => scrollToRevision(lastRevisionComment.id)}
                   className="flex items-center gap-1.5 text-emerald-700 font-mono text-[10px] underline underline-offset-2 hover:opacity-70 transition-opacity"
@@ -238,6 +234,17 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                   <CheckCircle className="w-3.5 h-3.5" />
                   View agreed revision in log
                 </button>
+              ) : item.status === 'REOPENED' ? (
+                <>
+                  <button
+                    onClick={() => scrollToRevision(lastRevisionComment.id)}
+                    className="flex items-center gap-1.5 text-gray-500 font-mono text-[10px] underline underline-offset-2 hover:opacity-70 transition-opacity opacity-60"
+                  >
+                    <CheckCircle className="w-3.5 h-3.5" />
+                    View agreed revision in log
+                  </button>
+                  <div className="text-[10px] opacity-50 italic">Agreement voided — awaiting new proposal</div>
+                </>
               ) : (
                 <>
                   {agreementComments.length > 0 && (
@@ -461,13 +468,15 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                         <div
                           className={`relative flex flex-col gap-0.5 mt-2 ${
                             isOwn ? 'self-start' : 'self-end'
-                          }`}
+                          } ${item.status === 'REOPENED' ? 'opacity-30' : ''}`}
                         >
-                          <div
-                            className={`absolute top-0 bottom-0 w-0.5 bg-emerald-400 ${
-                              isOwn ? 'right-0' : 'left-0'
-                            }`}
-                          />
+                          {item.status !== 'REOPENED' && (
+                            <div
+                              className={`absolute top-0 bottom-0 w-0.5 bg-emerald-400 ${
+                                isOwn ? 'right-0' : 'left-0'
+                              }`}
+                            />
+                          )}
                           {agreementCommentsForRevision.map(ac => (
                             <div key={ac.id} className={`flex flex-col ${isOwn ? 'pr-3' : 'pl-3'}`}>
                               <div className="flex items-center gap-2">
@@ -484,7 +493,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                                     <UserCog className="w-3.5 h-3.5" />
                                   )}
                                 </span>
-                                <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />
+                                <CheckCircle className={`w-5 h-5 shrink-0 ${item.status === 'REOPENED' ? 'text-gray-400' : 'text-emerald-600'}`} />
                                 <span className="font-mono text-xs font-semibold">{ac.role === role ? 'You' : ac.author} agreed</span>
                               </div>
                               <span className="font-mono text-[10px] opacity-50 mt-0.5 ml-8">
@@ -526,11 +535,13 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
               const pendingFromEdit = lastMeaningfulComment?.type === 'ITEM_REVISION';
               const canAgree =
                 !pendingFromEdit &&
-                (item.status === 'DISCUSSING' ||
-                  (item.status === 'PENDING' && item.pendingConfirmationFrom === role) ||
-                  (item.status === 'PENDING' && item.createdBy !== role && !item.pendingConfirmationFrom));
-              const canReopen = item.status === 'PENDING' || item.status === 'AGREED';
-              if (!canAgree && !canReopen) return null;
+                item.status === 'PENDING' &&
+                (item.pendingConfirmationFrom === role ||
+                  (item.createdBy && item.createdBy !== role && !item.pendingConfirmationFrom));
+              const canReopen = (item.status === 'PENDING' || item.status === 'AGREED') && !isReopenPromptOpen;
+              const isReopened = item.status === 'REOPENED';
+
+              if (!canAgree && !canReopen && !isReopened) return null;
               return (
                 <div className="pt-3 pb-2 flex gap-2">
                   {canAgree && (
@@ -543,11 +554,27 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                   )}
                   {canReopen && (
                     <button
-                      onClick={() => onUpdateStatus(item.id, 'DISCUSSING')}
+                      onClick={() => setIsReopenPromptOpen(true)}
                       className="flex-1 bg-transparent border border-[#141414] text-[#141414] py-2 px-4 font-mono text-xs hover:bg-amber-100 transition-colors"
                     >
                       {item.status === 'AGREED' ? 'RE-OPEN' : 'DISCUSS'}
                     </button>
+                  )}
+                  {isReopened && (
+                    <>
+                      <button
+                        onClick={() => onEdit()}
+                        className="flex-1 bg-transparent border border-[#141414] text-[#141414] py-2 px-4 font-mono text-xs hover:bg-blue-100 transition-colors"
+                      >
+                        EDIT — PROPOSE CHANGES
+                      </button>
+                      <button
+                        onClick={() => onUpdateStatus(item.id, 'AGREED')}
+                        className="flex-1 bg-[#141414] text-[#E4E3E0] py-2 px-4 font-mono text-xs hover:bg-emerald-700 transition-colors"
+                      >
+                        CONFIRM CURRENT SPEC
+                      </button>
+                    </>
                   )}
                 </div>
               );
@@ -557,23 +584,63 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
         </div>
       </div>
 
-      {/* Comment input */}
-      <div className="p-4 border-t border-[#141414] bg-[#E4E3E0] shrink-0">
-        <form onSubmit={handleSubmitComment} className="flex gap-2">
+      {/* Comment input / Reopen explanation prompt */}
+      <div className={`p-4 border-t border-[#141414] shrink-0 ${
+        isReopenPromptOpen ? 'bg-amber-50' : 'bg-[#E4E3E0]'
+      }`}>
+        {isReopenPromptOpen && (
+          <div className="mb-2 font-mono text-xs opacity-60 uppercase">Why are you reopening this?</div>
+        )}
+        <form
+          onSubmit={(e: React.FormEvent) => {
+            e.preventDefault();
+            if (text.trim()) {
+              if (isReopenPromptOpen) {
+                onReopen(item.id, text.trim());
+                setIsReopenPromptOpen(false);
+              } else {
+                onAddComment(item.id, text.trim());
+              }
+              setText('');
+            }
+          }}
+          className="flex gap-2"
+        >
           <input
             type="text"
             value={text}
             onChange={e => setText(e.target.value)}
-            placeholder="Type a message..."
-            className="flex-1 bg-transparent border-b border-[#141414] px-2 py-2 font-mono text-sm focus:outline-none focus:border-b-2"
+            placeholder={isReopenPromptOpen ? "Brief explanation..." : "Type a message..."}
+            autoFocus={isReopenPromptOpen}
+            className={`flex-1 bg-transparent px-2 py-2 font-mono text-sm focus:outline-none focus:border-b-2 ${
+              isReopenPromptOpen
+                ? 'border-b border-amber-800'
+                : 'border-b border-[#141414]'
+            }`}
           />
           <button
             type="submit"
             disabled={!text.trim()}
-            className="p-2 bg-[#141414] text-[#E4E3E0] disabled:opacity-50 hover:opacity-80 transition-opacity"
+            className={`p-2 disabled:opacity-50 hover:opacity-80 transition-opacity ${
+              isReopenPromptOpen
+                ? 'bg-amber-800 text-amber-50'
+                : 'bg-[#141414] text-[#E4E3E0]'
+            }`}
           >
             <Send className="w-4 h-4" />
           </button>
+          {isReopenPromptOpen && (
+            <button
+              type="button"
+              onClick={() => {
+                setIsReopenPromptOpen(false);
+                setText('');
+              }}
+              className="px-3 py-2 text-xs font-mono opacity-50 hover:opacity-100 transition-opacity"
+            >
+              Cancel
+            </button>
+          )}
         </form>
       </div>
     </Shell>
