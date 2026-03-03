@@ -224,7 +224,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
 
           {/* Agreement summary + ACCEPT button — only when revision is pending */}
           {lastRevisionComment && (
-            <div className="mt-4 pt-3 border-t border-[#141414]/20 space-y-2">
+            <div className="mt-4 space-y-2">
               {bothPartiesAgreed && item.status === 'AGREED' ? (
                 <button
                   onClick={() => scrollToRevision(lastRevisionComment.id)}
@@ -247,7 +247,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
               ) : (
                 <>
                   {agreementComments.length > 0 && (
-                    <div className="flex items-center gap-2 flex-wrap">
+                    <div className="flex items-center gap-2 flex-wrap pt-3">
                       <span className="font-mono text-[10px] opacity-60 uppercase tracking-wider">Confirmed by</span>
                       <div className="flex gap-1.5">
                         {agreementComments.map(ac => (
@@ -264,22 +264,30 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                       </div>
                     </div>
                   )}
-
-                  {item.pendingConfirmationFrom && !bothPartiesAgreed ? (
-                    <div className="font-mono text-[10px] opacity-50 uppercase tracking-wider">
-                      Waiting for {item.pendingConfirmationFrom}
-                    </div>
-                  ) : null}
-
-                  {lastRevisionComment.pendingUpdates && item.pendingConfirmationFrom === role && (
-                    <button
-                      onClick={() => onUpdateStatus(item.id, 'AGREED')}
-                      className="mt-1 w-full bg-[#141414] text-[#E4E3E0] py-2 px-4 font-mono text-xs hover:bg-emerald-700 transition-colors"
-                    >
-                      ACCEPT CHANGES
-                    </button>
-                  )}
                 </>
+              )}
+            </div>
+          )}
+          {/* Waiting for party to agree — bottom of spec */}
+          {item.pendingConfirmationFrom && !bothPartiesAgreed && lastRevisionComment && (
+            <div className="mt-4 pt-3 border-t border-[#141414]/20 space-y-2">
+              <div className="flex items-center gap-2">
+                <span className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 text-sm ${
+                  item.pendingConfirmationFrom === 'BAND' ? 'bg-indigo-200 text-indigo-700' : 'bg-cyan-200 text-cyan-700'
+                }`}>
+                  {item.pendingConfirmationFrom === 'BAND' ? <Music className="w-3 h-3 -mb-0.5" /> : <UserCog className="w-3 h-3" />}
+                </span>
+                <span className="font-mono text-[10px] opacity-60 uppercase tracking-wider">
+                  Waiting for {item.pendingConfirmationFrom} to agree
+                </span>
+              </div>
+              {lastRevisionComment.pendingUpdates && item.pendingConfirmationFrom === role && (
+                <button
+                  onClick={() => onUpdateStatus(item.id, 'AGREED')}
+                  className="w-full bg-[#141414] text-[#E4E3E0] py-2 px-4 font-mono text-xs hover:bg-emerald-700 transition-colors"
+                >
+                  ACCEPT CHANGES
+                </button>
               )}
             </div>
           )}
