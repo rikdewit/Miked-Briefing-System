@@ -485,8 +485,13 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                 }
                 if (comment.isReopenExplanation) {
                   const isOwnComment = comment.role === role;
+                  const bubbleStyle =
+                    comment.role === 'BAND'
+                      ? 'bg-indigo-100 text-indigo-900 border-indigo-300'
+                      : 'bg-cyan-100 text-cyan-900 border-cyan-300';
                   return (
-                    <div key={comment.id} className={`flex flex-col w-full my-1 ${isOwnComment ? 'items-end' : 'items-start'}`}>
+                    <div key={comment.id} className="flex flex-col gap-2 w-full my-1">
+                      {/* Reopened notification row */}
                       <div className={`relative flex flex-col gap-0.5 ${isOwnComment ? 'self-end' : 'self-start'}`}>
                         <div className={`absolute top-0 bottom-0 w-0.5 bg-orange-400 ${isOwnComment ? 'right-0' : 'left-0'}`} />
                         <div className={`flex flex-col ${isOwnComment ? 'pr-3' : 'pl-3'}`}>
@@ -499,10 +504,25 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                             <RotateCcw className="w-5 h-5 shrink-0 text-orange-600" />
                             <span className="font-mono text-xs font-semibold">{isOwnComment ? 'You' : (comment.role === 'BAND' ? 'Band' : 'Engineer')} reopened</span>
                           </div>
-                          <p className="font-mono text-xs mt-0.5 ml-8 text-neutral-700">{comment.text}</p>
                           <span className="font-mono text-[10px] opacity-50 mt-0.5 ml-8">
                             {new Date(comment.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
+                        </div>
+                      </div>
+
+                      {/* Explanation as separate message bubble */}
+                      <div className={`flex flex-col ${isOwnComment ? 'items-end' : 'items-start'}`}>
+                        <div className={`max-w-[85%] p-3 border ${bubbleStyle}`}>
+                          <p className="text-sm">{comment.text}</p>
+                        </div>
+                        <div className="flex items-center gap-1 font-mono text-[10px] mt-1 opacity-50">
+                          <span className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
+                            comment.role === 'BAND' ? 'bg-indigo-200 text-indigo-700' : 'bg-cyan-200 text-cyan-700'
+                          }`}>
+                            {comment.role === 'BAND' ? <Music className="w-3 h-3 -mb-0.5" /> : <UserCog className="w-3 h-3" />}
+                          </span>
+                          {isOwnComment ? 'You' : (comment.role === 'BAND' ? 'Band' : 'Engineer')} •{' '}
+                          {new Date(comment.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </div>
                       </div>
                     </div>
@@ -524,7 +544,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                               {comment.role === 'BAND' ? <Music className="w-3.5 h-3.5 -mb-0.5" /> : <UserCog className="w-3.5 h-3.5" />}
                             </span>
                             <CheckCircle className="w-5 h-5 shrink-0 text-emerald-600" />
-                            <span className="font-mono text-xs font-semibold">{isOwnComment ? 'You' : comment.author} {agreementText}</span>
+                            <span className="font-mono text-xs font-semibold">{isOwnComment ? 'You' : (comment.role === 'BAND' ? 'Band' : 'Engineer')} {agreementText}</span>
                           </div>
                           <span className="font-mono text-[10px] opacity-50 mt-0.5 ml-8">
                             {new Date(comment.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -549,7 +569,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                       }`}>
                         {comment.role === 'BAND' ? <Music className="w-3 h-3 -mb-0.5" /> : <UserCog className="w-3 h-3" />}
                       </span>
-                      {comment.role === role ? 'You' : comment.author} •{' '}
+                      {comment.role === role ? 'You' : (comment.role === 'BAND' ? 'Band' : 'Engineer')} •{' '}
                       {new Date(comment.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
                   </div>
