@@ -138,17 +138,16 @@ export const MOCK_GLOBAL_MESSAGES: ChatMessage[] = [
 ];
 
 export const MOCK_ITEMS: BriefItem[] = [
-  // Afke (Vocals) - Example with reopen and current spec agreement
+  // Afke (Vocals) - Example with reopen and mutual agreement
   {
     id: '1',
     category: 'MICROPHONES',
     title: 'Lead Vocal Mic',
     description: 'SM58 or comparable for Afke.',
     provider: 'ENGINEER',
-    status: 'PENDING',
+    status: 'AGREED',
     requestedBy: 'Afke',
     createdBy: 'BAND',
-    pendingConfirmationFrom: 'ENGINEER',
     assignedTo: 'Engineer',
     comments: [
       {
@@ -194,6 +193,14 @@ export const MOCK_ITEMS: BriefItem[] = [
         text: '',
         timestamp: '2023-10-26T10:36:00Z',
         isCurrentSpecAgreement: true
+      },
+      {
+        id: 'c-vocal-6',
+        author: 'Engineer',
+        role: 'ENGINEER',
+        text: '',
+        timestamp: '2023-10-26T10:37:00Z',
+        isCurrentSpecAgreement: true
       }
     ],
     specs: { make: 'Shure', model: 'Beta 58A', quantity: 1 }
@@ -205,12 +212,46 @@ export const MOCK_ITEMS: BriefItem[] = [
     title: 'Tenor Sax Mic (Acoustic)',
     description: 'For acoustic sound. Prefer AEA E8 NUVO, otherwise AKG 414 XLII.',
     provider: 'ENGINEER',
-    status: 'PENDING',
+    status: 'AGREED',
     requestedBy: 'Fabio',
     createdBy: 'BAND',
-    pendingConfirmationFrom: 'ENGINEER',
     assignedTo: 'Engineer',
-    comments: [],
+    comments: [
+      {
+        id: 'c-sax-2-1',
+        author: 'Engineer',
+        role: 'ENGINEER',
+        text: 'updated the brief:\nSpecs updated',
+        timestamp: '2023-10-26T10:10:00Z',
+        type: 'ITEM_REVISION',
+        previousData: { specs: { make: 'AEA', model: 'E8', quantity: 1 } },
+        newData: { specs: { make: 'AEA', model: 'E8 NUVO', quantity: 1 } }
+      },
+      {
+        id: 'c-sax-2-2',
+        author: 'Fabio',
+        role: 'BAND',
+        text: 'perfect upgrade!',
+        timestamp: '2023-10-26T10:11:00Z',
+        type: 'TEXT'
+      },
+      {
+        id: 'c-sax-2-3',
+        author: 'Fabio',
+        role: 'BAND',
+        text: '',
+        timestamp: '2023-10-26T10:12:00Z',
+        isCurrentSpecAgreement: true
+      },
+      {
+        id: 'c-sax-2-4',
+        author: 'Engineer',
+        role: 'ENGINEER',
+        text: '',
+        timestamp: '2023-10-26T10:13:00Z',
+        isCurrentSpecAgreement: true
+      }
+    ],
     specs: { make: 'AEA', model: 'E8 NUVO', quantity: 1 }
   },
   {

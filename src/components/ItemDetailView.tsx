@@ -341,6 +341,8 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                     const c = item.comments[j];
                     if (c.type === 'STATUS_CHANGE' && c.newStatus === 'AGREED') {
                       agreementCommentsForRevision.push(c);
+                    } else if (c.isCurrentSpecAgreement) {
+                      agreementCommentsForRevision.push(c);
                     } else if (
                       c.type === 'ITEM_REVISION' ||
                       (c.type === 'STATUS_CHANGE' && c.newStatus !== 'AGREED')
@@ -463,45 +465,6 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                         {comment.role === role ? 'You' : comment.author} updated brief •{' '}
                         {new Date(comment.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </div>
-                      {agreementCommentsForRevision.length > 0 && (
-                        <div
-                          className={`relative flex flex-col gap-0.5 mt-2 ${
-                            isOwn ? 'self-start' : 'self-end'
-                          } ${item.status === 'DISCUSSING' ? 'opacity-30' : ''}`}
-                        >
-                          {item.status !== 'DISCUSSING' && (
-                            <div
-                              className={`absolute top-0 bottom-0 w-0.5 bg-emerald-400 ${
-                                isOwn ? 'right-0' : 'left-0'
-                              }`}
-                            />
-                          )}
-                          {agreementCommentsForRevision.map(ac => (
-                            <div key={ac.id} className={`flex flex-col ${isOwn ? 'pr-3' : 'pl-3'}`}>
-                              <div className="flex items-center gap-2">
-                                <span
-                                  className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
-                                    ac.role === 'BAND'
-                                      ? 'bg-indigo-200 text-indigo-700'
-                                      : 'bg-cyan-200 text-cyan-700'
-                                  }`}
-                                >
-                                  {ac.role === 'BAND' ? (
-                                    <Music className="w-3.5 h-3.5 -mb-0.5" />
-                                  ) : (
-                                    <UserCog className="w-3.5 h-3.5" />
-                                  )}
-                                </span>
-                                <CheckCircle className={`w-5 h-5 shrink-0 ${item.status === 'DISCUSSING' ? 'text-gray-400' : 'text-emerald-600'}`} />
-                                <span className="font-mono text-xs font-semibold">{ac.role === role ? 'You' : ac.author} agreed</span>
-                              </div>
-                              <span className="font-mono text-[10px] opacity-50 mt-0.5 ml-8">
-                                {new Date(ac.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
                     </div>
                   );
                 }
@@ -532,6 +495,10 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                 }
                 if (comment.isCurrentSpecAgreement) {
                   const isOwnComment = comment.role === role;
+                  // Check if this agreement is after a reopen (look for isReopenExplanation before this comment)
+                  const hasReopenBefore = item.comments.slice(0, item.comments.indexOf(comment)).some(c => c.isReopenExplanation);
+                  const agreementText = hasReopenBefore ? 'agreed on current spec' : 'agrees';
+
                   return (
                     <div key={comment.id} className={`flex flex-col w-full my-1 ${isOwnComment ? 'items-end' : 'items-start'}`}>
                       <div className={`relative flex flex-col gap-0.5 ${isOwnComment ? 'self-end' : 'self-start'}`}>
@@ -544,7 +511,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                               {comment.role === 'BAND' ? <Music className="w-3.5 h-3.5 -mb-0.5" /> : <UserCog className="w-3.5 h-3.5" />}
                             </span>
                             <CheckCircle className="w-5 h-5 shrink-0 text-emerald-600" />
-                            <span className="font-mono text-xs font-semibold">{isOwnComment ? 'You' : comment.author} agreed on current spec</span>
+                            <span className="font-mono text-xs font-semibold">{isOwnComment ? 'You' : comment.author} {agreementText}</span>
                           </div>
                           <span className="font-mono text-[10px] opacity-50 mt-0.5 ml-8">
                             {new Date(comment.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
