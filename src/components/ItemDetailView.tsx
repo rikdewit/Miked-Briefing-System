@@ -213,11 +213,9 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
           </div>
 
           {/* Agreement summary + ACCEPT button — only when revision is pending */}
-          {lastRevisionComment && (
+          {lastRevisionComment && item.status !== 'DISCUSSING' && (
             <div className="mt-4 space-y-2">
-              {bothPartiesAgreed && item.status === 'AGREED' ? null : item.status === 'DISCUSSING' ? (
-                <div className="text-[10px] opacity-50 italic">Agreement voided — awaiting new proposal</div>
-              ) : (
+              {bothPartiesAgreed && item.status === 'AGREED' ? null : (
                 <>
                   {agreementComments.length > 0 && (
                     <div className="flex items-center gap-2 flex-wrap pt-3">
