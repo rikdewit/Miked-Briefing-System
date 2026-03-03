@@ -105,11 +105,6 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
         <div className="flex items-center gap-2 shrink-0">
           <div className="flex flex-col items-end">
             <StatusBadge item={item} />
-            {item.status === 'PENDING' && item.pendingConfirmationFrom && (
-              <span className="text-[10px] font-mono opacity-50 mt-0.5 uppercase">
-                Waiting for {item.pendingConfirmationFrom}
-              </span>
-            )}
           </div>
           <button
             onClick={onEdit}
