@@ -38,11 +38,6 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
     commentsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [item.comments]);
 
-  const scrollToRevision = (commentId: string) => {
-    const el = scrollContainerRef.current?.querySelector(`#revision-${commentId}`);
-    el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
   // Get the latest revision comment first
   const lastRevisionComment = [...item.comments].reverse().find(c => c.type === 'ITEM_REVISION');
   const lastRevisionIndex = lastRevisionComment
@@ -220,25 +215,8 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
           {/* Agreement summary + ACCEPT button — only when revision is pending */}
           {lastRevisionComment && (
             <div className="mt-4 space-y-2">
-              {bothPartiesAgreed && item.status === 'AGREED' ? (
-                <button
-                  onClick={() => scrollToRevision(lastRevisionComment.id)}
-                  className="flex items-center gap-1.5 text-emerald-700 font-mono text-[10px] underline underline-offset-2 hover:opacity-70 transition-opacity"
-                >
-                  <CheckCircle className="w-3.5 h-3.5" />
-                  View agreed revision in log
-                </button>
-              ) : item.status === 'DISCUSSING' ? (
-                <>
-                  <button
-                    onClick={() => scrollToRevision(lastRevisionComment.id)}
-                    className="flex items-center gap-1.5 text-gray-500 font-mono text-[10px] underline underline-offset-2 hover:opacity-70 transition-opacity opacity-60"
-                  >
-                    <CheckCircle className="w-3.5 h-3.5" />
-                    View agreed revision in log
-                  </button>
-                  <div className="text-[10px] opacity-50 italic">Agreement voided — awaiting new proposal</div>
-                </>
+              {bothPartiesAgreed && item.status === 'AGREED' ? null : item.status === 'DISCUSSING' ? (
+                <div className="text-[10px] opacity-50 italic">Agreement voided — awaiting new proposal</div>
               ) : (
                 <>
                   {agreementComments.length > 0 && (
