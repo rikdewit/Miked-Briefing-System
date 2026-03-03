@@ -480,7 +480,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                               {comment.role === 'BAND' ? <Music className="w-3.5 h-3.5 -mb-0.5" /> : <UserCog className="w-3.5 h-3.5" />}
                             </span>
                             <RotateCcw className="w-5 h-5 shrink-0 text-orange-600" />
-                            <span className="font-mono text-xs font-semibold">{isOwnComment ? 'You' : (comment.role === 'BAND' ? 'Band' : 'Engineer')} reopened</span>
+                            <span className="font-mono text-xs font-semibold">{isOwnComment ? 'You' : (comment.role === 'BAND' ? 'Band' : 'Engineer')} reopened discussion</span>
                           </div>
                           <span className="font-mono text-[10px] opacity-50 mt-0.5 ml-8">
                             {new Date(comment.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
