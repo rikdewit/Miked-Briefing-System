@@ -57,7 +57,6 @@ export interface Comment {
   };
   pendingUpdates?: Partial<BriefItem>; // For ITEM_REVISION: proposed changes (not yet applied to item)
   isReopenExplanation?: boolean; // For plain text comments explaining why spec was reopened
-  isRejectExplanation?: boolean; // For plain text comments explaining why proposal was rejected
 }
 
 export interface BriefItem {

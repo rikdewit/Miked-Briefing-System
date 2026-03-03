@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { BriefItem, Role, Comment } from '../types';
 import { StatusBadge } from './Badges';
 import { ProviderBadge } from './ProviderBadge';
-import { Send, ChevronLeft, Edit2, CheckCircle, Music, UserCog, RotateCcw, XCircle } from 'lucide-react';
+import { Send, ChevronLeft, Edit2, CheckCircle, Music, UserCog, RotateCcw } from 'lucide-react';
 
 interface ItemDetailViewProps {
   item: BriefItem;
@@ -12,7 +12,6 @@ interface ItemDetailViewProps {
   onUpdateStatus: (id: string, status: BriefItem['status']) => void;
   onEdit: () => void;
   onReopen: (id: string, message: string) => void;
-  onReject: (id: string, message: string) => void;
 }
 
 const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -29,11 +28,9 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
   onUpdateStatus,
   onEdit,
   onReopen,
-  onReject,
 }) => {
   const [text, setText] = useState('');
   const [isReopenPromptOpen, setIsReopenPromptOpen] = useState(false);
-  const [isRejectPromptOpen, setIsRejectPromptOpen] = useState(false);
   const commentsEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -533,31 +530,6 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                     </div>
                   );
                 }
-                if (comment.isRejectExplanation) {
-                  const isOwnComment = comment.role === role;
-                  return (
-                    <div key={comment.id} className={`flex flex-col w-full my-1 ${isOwnComment ? 'items-end' : 'items-start'}`}>
-                      <div className={`relative flex flex-col gap-0.5 ${isOwnComment ? 'self-end' : 'self-start'}`}>
-                        <div className={`absolute top-0 bottom-0 w-0.5 bg-red-400 ${isOwnComment ? 'right-0' : 'left-0'}`} />
-                        <div className={`flex flex-col ${isOwnComment ? 'pr-3' : 'pl-3'}`}>
-                          <div className="flex items-center gap-2">
-                            <span className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
-                              comment.role === 'BAND' ? 'bg-indigo-200 text-indigo-700' : 'bg-cyan-200 text-cyan-700'
-                            }`}>
-                              {comment.role === 'BAND' ? <Music className="w-3.5 h-3.5 -mb-0.5" /> : <UserCog className="w-3.5 h-3.5" />}
-                            </span>
-                            <XCircle className="w-5 h-5 shrink-0 text-red-600" />
-                            <span className="font-mono text-xs font-semibold">{isOwnComment ? 'You' : (comment.role === 'BAND' ? 'Band' : 'Engineer')} rejected</span>
-                          </div>
-                          <p className="font-mono text-xs mt-0.5 ml-8 text-neutral-700">{comment.text}</p>
-                          <span className="font-mono text-[10px] opacity-50 mt-0.5 ml-8">
-                            {new Date(comment.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                }
                 const bubbleStyle =
                   comment.role === 'BAND'
                     ? 'bg-indigo-100 text-indigo-900 border-indigo-300'
@@ -586,12 +558,6 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                 .find(c => c.type === 'ITEM_REVISION' || c.type === 'STATUS_CHANGE');
               const pendingFromEdit = lastMeaningfulComment?.type === 'ITEM_REVISION';
 
-              // Find the last reopen explanation (if any)
-              const lastReopenComment = [...item.comments]
-                .reverse()
-                .find(c => c.isReopenExplanation);
-              const reopenedByCurrentUser = lastReopenComment?.role === role;
-
               const canAgree =
                 !pendingFromEdit &&
                 item.status === 'PENDING' &&
@@ -599,21 +565,10 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                   (item.createdBy && item.createdBy !== role && !item.pendingConfirmationFrom));
               const canReopen =
                 item.status === 'AGREED' &&
-                !isReopenPromptOpen &&
-                !isRejectPromptOpen;
-              // Can reject if: status is PENDING (normal rejection), OR
-              // status is DISCUSSING with reopen AND we're NOT the one who reopened
-              const canReject =
-                (item.status === 'PENDING' ||
-                  (item.status === 'DISCUSSING' && lastReopenComment && !reopenedByCurrentUser)) &&
-                !isRejectPromptOpen &&
                 !isReopenPromptOpen;
               const isDiscussing = item.status === 'DISCUSSING';
 
-              // Show accept button if reopened and we're not the one who reopened
-              const canAcceptReopening = isDiscussing && lastReopenComment && !reopenedByCurrentUser;
-
-              if (!canAgree && !canReopen && !canReject && !isDiscussing) return null;
+              if (!canAgree && !canReopen && !isDiscussing) return null;
               return (
                 <div className="pt-3 pb-2 flex gap-2">
                   {canAgree && (
@@ -624,22 +579,6 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                       CONFIRM / AGREE
                     </button>
                   )}
-                  {canAcceptReopening && (
-                    <button
-                      onClick={() => onUpdateStatus(item.id, 'AGREED')}
-                      className="flex-1 bg-[#141414] text-[#E4E3E0] py-2 px-4 font-mono text-xs hover:bg-emerald-700 transition-colors"
-                    >
-                      ACCEPT REOPENING
-                    </button>
-                  )}
-                  {canReject && (
-                    <button
-                      onClick={() => setIsRejectPromptOpen(true)}
-                      className="flex-1 bg-transparent border border-red-600 text-red-700 py-2 px-4 font-mono text-xs hover:bg-red-50 transition-colors"
-                    >
-                      {lastReopenComment && !reopenedByCurrentUser ? 'REJECT REOPENING' : 'REJECT'}
-                    </button>
-                  )}
                   {canReopen && (
                     <button
                       onClick={() => setIsReopenPromptOpen(true)}
@@ -648,17 +587,17 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                       REOPEN DISCUSSION
                     </button>
                   )}
-                  {isDiscussing && !lastReopenComment && (
+                  {isDiscussing && (
                     <>
                       <button
                         onClick={() => onEdit()}
-                        className="flex-1 bg-transparent border border-[#141414] text-[#141414] py-2 px-4 font-mono text-xs hover:bg-blue-100 transition-colors"
+                        className="flex-1 bg-[#141414] text-[#E4E3E0] py-2 px-4 font-mono text-xs hover:bg-blue-700 transition-colors"
                       >
-                        EDIT — PROPOSE CHANGES
+                        PROPOSE CHANGES
                       </button>
                       <button
                         onClick={() => onUpdateStatus(item.id, 'AGREED')}
-                        className="flex-1 bg-[#141414] text-[#E4E3E0] py-2 px-4 font-mono text-xs hover:bg-emerald-700 transition-colors"
+                        className="flex-1 bg-transparent border border-[#141414] text-[#141414] py-2 px-4 font-mono text-xs hover:bg-emerald-50 transition-colors"
                       >
                         CONFIRM CURRENT SPEC
                       </button>
@@ -672,15 +611,12 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
         </div>
       </div>
 
-      {/* Comment input / Reopen & Reject explanation prompts */}
+      {/* Comment input / Reopen explanation prompt */}
       <div className={`p-4 border-t border-[#141414] shrink-0 ${
-        isReopenPromptOpen ? 'bg-amber-50' : isRejectPromptOpen ? 'bg-red-50' : 'bg-[#E4E3E0]'
+        isReopenPromptOpen ? 'bg-amber-50' : 'bg-[#E4E3E0]'
       }`}>
         {isReopenPromptOpen && (
           <div className="mb-2 font-mono text-xs opacity-60 uppercase">Why are you reopening this?</div>
-        )}
-        {isRejectPromptOpen && (
-          <div className="mb-2 font-mono text-xs opacity-60 uppercase">Why are you rejecting this?</div>
         )}
         <form
           onSubmit={(e: React.FormEvent) => {
@@ -689,9 +625,6 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
               if (isReopenPromptOpen) {
                 onReopen(item.id, text.trim());
                 setIsReopenPromptOpen(false);
-              } else if (isRejectPromptOpen) {
-                onReject(item.id, text.trim());
-                setIsRejectPromptOpen(false);
               } else {
                 onAddComment(item.id, text.trim());
               }
@@ -704,41 +637,26 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
             type="text"
             value={text}
             onChange={e => setText(e.target.value)}
-            placeholder={
-              isReopenPromptOpen
-                ? 'Brief explanation...'
-                : isRejectPromptOpen
-                  ? 'Brief explanation...'
-                  : 'Type a message...'
-            }
-            autoFocus={isReopenPromptOpen || isRejectPromptOpen}
+            placeholder={isReopenPromptOpen ? 'Brief explanation...' : 'Type a message...'}
+            autoFocus={isReopenPromptOpen}
             className={`flex-1 bg-transparent px-2 py-2 font-mono text-sm focus:outline-none focus:border-b-2 ${
-              isReopenPromptOpen
-                ? 'border-b border-amber-800'
-                : isRejectPromptOpen
-                  ? 'border-b border-red-700'
-                  : 'border-b border-[#141414]'
+              isReopenPromptOpen ? 'border-b border-amber-800' : 'border-b border-[#141414]'
             }`}
           />
           <button
             type="submit"
             disabled={!text.trim()}
             className={`p-2 disabled:opacity-50 hover:opacity-80 transition-opacity ${
-              isReopenPromptOpen
-                ? 'bg-amber-800 text-amber-50'
-                : isRejectPromptOpen
-                  ? 'bg-red-700 text-red-50'
-                  : 'bg-[#141414] text-[#E4E3E0]'
+              isReopenPromptOpen ? 'bg-amber-800 text-amber-50' : 'bg-[#141414] text-[#E4E3E0]'
             }`}
           >
             <Send className="w-4 h-4" />
           </button>
-          {(isReopenPromptOpen || isRejectPromptOpen) && (
+          {isReopenPromptOpen && (
             <button
               type="button"
               onClick={() => {
                 setIsReopenPromptOpen(false);
-                setIsRejectPromptOpen(false);
                 setText('');
               }}
               className="px-3 py-2 text-xs font-mono opacity-50 hover:opacity-100 transition-opacity"

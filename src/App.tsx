@@ -76,9 +76,9 @@ function App() {
 
     if (newStatus === 'AGREED') {
       if (item.status === 'DISCUSSING') {
-        // From DISCUSSING: "Confirm current spec" goes straight to AGREED (no two-step needed)
-        actualNewStatus = 'AGREED';
-        pendingConfirmationFrom = undefined;
+        // From DISCUSSING (reopened): goes to PENDING first, requiring both parties to confirm
+        actualNewStatus = 'PENDING';
+        pendingConfirmationFrom = currentUserRole === 'BAND' ? 'ENGINEER' : 'BAND';
       } else if (item.status === 'PENDING') {
         if (item.pendingConfirmationFrom === currentUserRole ||
             (item.createdBy && item.createdBy !== currentUserRole && !item.pendingConfirmationFrom)) {
@@ -362,51 +362,6 @@ function App() {
     });
   };
 
-  const handleReject = (id: string, message: string) => {
-    const item = items.find(i => i.id === id);
-    if (!item) return;
-
-    // Check if this is rejecting a reopening (status is DISCUSSING with a reopen comment)
-    const lastReopenComment = [...item.comments]
-      .reverse()
-      .find(c => c.isReopenExplanation);
-    const isRejectingReopening = item.status === 'DISCUSSING' && lastReopenComment;
-
-    // Create explanation comment marked as reject explanation
-    const explanationComment: Comment = {
-      id: `c${Date.now()}`,
-      author: currentUserRole === 'BAND' ? 'You (Band)' : 'You (Eng)',
-      role: currentUserRole,
-      text: message,
-      timestamp: new Date().toISOString(),
-      isRejectExplanation: true,
-    };
-
-    // If rejecting a reopening, go back to AGREED; otherwise, mark as DISCUSSING
-    const newStatus = isRejectingReopening ? ('AGREED' as const) : ('DISCUSSING' as const);
-
-    // Atomically update item with explanation and status change
-    const newItem = {
-      ...item,
-      status: newStatus,
-      pendingConfirmationFrom: undefined,
-      comments: [...item.comments, explanationComment],
-    };
-
-    setItems(prev => prev.map(i => i.id === id ? newItem : i));
-    if (selectedItem?.id === id) setSelectedItem(newItem);
-
-    // Post system update to global chat
-    postSystemUpdate({
-      role: currentUserRole,
-      timestamp: new Date().toISOString(),
-      itemId: id,
-      itemTitle: item.title,
-      itemCategory: item.category,
-      updateType: 'STATUS_CHANGE',
-      itemSnapshot: { previousStatus: item.status, newStatus },
-    });
-  };
 
   const pendingCount = items.filter(i => i.status === 'PENDING').length;
   const discussingCount = items.filter(i => i.status === 'DISCUSSING').length;
@@ -527,7 +482,6 @@ function App() {
           onUpdateProvider={handleUpdateProvider}
           onEdit={() => setEditingItem(selectedItem)}
           onReopen={handleReopen}
-          onReject={handleReject}
           editingItem={editingItem}
           onSaveEdit={(id, updates) => { handleEditItem(id, updates); setEditingItem(null); }}
           onCloseEdit={() => setEditingItem(null)}
