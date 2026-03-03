@@ -263,28 +263,28 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
               )}
             </div>
           )}
-          {/* Waiting for party to agree — bottom of spec */}
-          {item.pendingConfirmationFrom && !bothPartiesAgreed && lastRevisionComment && (
-            <div className="mt-4 pt-3 border-t border-[#141414]/20 space-y-2">
-              <div className="flex items-center gap-2">
-                <span className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 text-sm ${
-                  item.pendingConfirmationFrom === 'BAND' ? 'bg-indigo-200 text-indigo-700' : 'bg-cyan-200 text-cyan-700'
-                }`}>
-                  {item.pendingConfirmationFrom === 'BAND' ? <Music className="w-3 h-3 -mb-0.5" /> : <UserCog className="w-3 h-3" />}
-                </span>
-                <span className="font-mono text-[10px] opacity-60 uppercase tracking-wider">
-                  Waiting for {item.pendingConfirmationFrom} to agree
-                </span>
-              </div>
-              {lastRevisionComment.pendingUpdates && item.pendingConfirmationFrom === role && (
+          {/* Pending confirmation - ACCEPT button only when user is waiting for */}
+          {lastRevisionComment?.pendingUpdates && item.pendingConfirmationFrom === role && (
+            <>
+              <div className="mt-4 pt-3 border-t border-[#141414]/20">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 text-sm ${
+                    lastRevisionComment.role === 'BAND' ? 'bg-indigo-200 text-indigo-700' : 'bg-cyan-200 text-cyan-700'
+                  }`}>
+                    {lastRevisionComment.role === 'BAND' ? <Music className="w-3 h-3 -mb-0.5" /> : <UserCog className="w-3 h-3" />}
+                  </span>
+                  <span className="font-mono text-[10px] opacity-60 uppercase tracking-wider">
+                    {lastRevisionComment.role} proposed a change
+                  </span>
+                </div>
                 <button
                   onClick={() => onUpdateStatus(item.id, 'AGREED')}
                   className="w-full bg-[#141414] text-[#E4E3E0] py-2 px-4 font-mono text-xs hover:bg-emerald-700 transition-colors"
                 >
                   ACCEPT CHANGES
                 </button>
-              )}
-            </div>
+              </div>
+            </>
           )}
         </div>
 
@@ -468,6 +468,18 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                         {comment.role === role ? 'You' : comment.author} proposed a change •{' '}
                         {new Date(comment.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </div>
+                      {isLastRevision && item.pendingConfirmationFrom && item.pendingConfirmationFrom !== role && (
+                        <div className={`flex w-full ${isOwn ? 'justify-start' : 'justify-end'} mt-2`}>
+                          <div className="flex items-center gap-2 p-2 bg-gray-50 rounded text-[10px] max-w-[85%]">
+                            <span className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 text-xs ${
+                              item.pendingConfirmationFrom === 'BAND' ? 'bg-indigo-200 text-indigo-700' : 'bg-cyan-200 text-cyan-700'
+                            }`}>
+                              {item.pendingConfirmationFrom === 'BAND' ? <Music className="w-2.5 h-2.5 -mb-0.5" /> : <UserCog className="w-2.5 h-2.5" />}
+                            </span>
+                            <span className="font-mono opacity-60 uppercase">Waiting for {item.pendingConfirmationFrom} to agree</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   );
                 }
@@ -498,9 +510,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                 }
                 if (comment.isCurrentSpecAgreement) {
                   const isOwnComment = comment.role === role;
-                  // Check if this agreement is after a reopen (look for isReopenExplanation before this comment)
-                  const hasReopenBefore = item.comments.slice(0, item.comments.indexOf(comment)).some(c => c.isReopenExplanation);
-                  const agreementText = hasReopenBefore ? 'agreed on current spec' : isOwnComment ? 'agree' : 'agrees';
+                  const agreementText = isOwnComment ? 'agree' : 'agrees';
 
                   return (
                     <div key={comment.id} className={`flex flex-col w-full my-1 ${isOwnComment ? 'items-end' : 'items-start'}`}>
