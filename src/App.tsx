@@ -76,8 +76,9 @@ function App() {
 
     if (newStatus === 'AGREED') {
       if (item.status === 'DISCUSSING') {
-        actualNewStatus = 'PENDING';
-        pendingConfirmationFrom = currentUserRole === 'BAND' ? 'ENGINEER' : 'BAND';
+        // From DISCUSSING: "Confirm current spec" goes straight to AGREED (no two-step needed)
+        actualNewStatus = 'AGREED';
+        pendingConfirmationFrom = undefined;
       } else if (item.status === 'PENDING') {
         if (item.pendingConfirmationFrom === currentUserRole ||
             (item.createdBy && item.createdBy !== currentUserRole && !item.pendingConfirmationFrom)) {
@@ -85,9 +86,6 @@ function App() {
         } else {
           return;
         }
-      } else if (item.status === 'REOPENED') {
-        // When confirming from REOPENED state, go straight to AGREED (no re-confirmation needed)
-        actualNewStatus = 'AGREED';
       }
     }
 
@@ -100,11 +98,6 @@ function App() {
       }
     }
 
-    // When transitioning to REOPENED, clear pendingConfirmationFrom
-    if (newStatus === 'REOPENED') {
-      actualNewStatus = 'REOPENED';
-      pendingConfirmationFrom = undefined;
-    }
 
     postSystemUpdate({
       role: currentUserRole,
@@ -122,9 +115,7 @@ function App() {
       role: currentUserRole,
       text: pendingConfirmationFrom
         ? `agreed — waiting for ${pendingConfirmationFrom} confirmation`
-        : actualNewStatus === 'REOPENED'
-          ? 'reopened for discussion'
-          : `changed status to ${actualNewStatus}`,
+        : `changed status to ${actualNewStatus}`,
       timestamp: new Date().toISOString(),
       type: 'STATUS_CHANGE',
       newStatus: actualNewStatus,
@@ -351,7 +342,7 @@ function App() {
     // Atomically update item with explanation and status change
     const newItem = {
       ...item,
-      status: 'REOPENED' as const,
+      status: 'DISCUSSING' as const,
       pendingConfirmationFrom: undefined,
       comments: [...item.comments, explanationComment],
     };
@@ -367,7 +358,53 @@ function App() {
       itemTitle: item.title,
       itemCategory: item.category,
       updateType: 'STATUS_CHANGE',
-      itemSnapshot: { previousStatus: item.status, newStatus: 'REOPENED' },
+      itemSnapshot: { previousStatus: item.status, newStatus: 'DISCUSSING' },
+    });
+  };
+
+  const handleReject = (id: string, message: string) => {
+    const item = items.find(i => i.id === id);
+    if (!item) return;
+
+    // Check if this is rejecting a reopening (status is DISCUSSING with a reopen comment)
+    const lastReopenComment = [...item.comments]
+      .reverse()
+      .find(c => c.isReopenExplanation);
+    const isRejectingReopening = item.status === 'DISCUSSING' && lastReopenComment;
+
+    // Create explanation comment marked as reject explanation
+    const explanationComment: Comment = {
+      id: `c${Date.now()}`,
+      author: currentUserRole === 'BAND' ? 'You (Band)' : 'You (Eng)',
+      role: currentUserRole,
+      text: message,
+      timestamp: new Date().toISOString(),
+      isRejectExplanation: true,
+    };
+
+    // If rejecting a reopening, go back to AGREED; otherwise, mark as DISCUSSING
+    const newStatus = isRejectingReopening ? ('AGREED' as const) : ('DISCUSSING' as const);
+
+    // Atomically update item with explanation and status change
+    const newItem = {
+      ...item,
+      status: newStatus,
+      pendingConfirmationFrom: undefined,
+      comments: [...item.comments, explanationComment],
+    };
+
+    setItems(prev => prev.map(i => i.id === id ? newItem : i));
+    if (selectedItem?.id === id) setSelectedItem(newItem);
+
+    // Post system update to global chat
+    postSystemUpdate({
+      role: currentUserRole,
+      timestamp: new Date().toISOString(),
+      itemId: id,
+      itemTitle: item.title,
+      itemCategory: item.category,
+      updateType: 'STATUS_CHANGE',
+      itemSnapshot: { previousStatus: item.status, newStatus },
     });
   };
 
@@ -490,6 +527,7 @@ function App() {
           onUpdateProvider={handleUpdateProvider}
           onEdit={() => setEditingItem(selectedItem)}
           onReopen={handleReopen}
+          onReject={handleReject}
           editingItem={editingItem}
           onSaveEdit={(id, updates) => { handleEditItem(id, updates); setEditingItem(null); }}
           onCloseEdit={() => setEditingItem(null)}

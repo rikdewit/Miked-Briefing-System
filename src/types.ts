@@ -20,7 +20,7 @@ export interface ChatMessage {
   };
 }
 
-export type ItemStatus = 'PENDING' | 'DISCUSSING' | 'AGREED' | 'REOPENED' | 'REJECTED';
+export type ItemStatus = 'PENDING' | 'DISCUSSING' | 'AGREED';
 
 export type Category = 'MONITORING' | 'MICROPHONES' | 'PA' | 'BACKLINE' | 'LIGHTING' | 'STAGE' | 'POWER' | 'HOSPITALITY';
 
@@ -57,6 +57,7 @@ export interface Comment {
   };
   pendingUpdates?: Partial<BriefItem>; // For ITEM_REVISION: proposed changes (not yet applied to item)
   isReopenExplanation?: boolean; // For plain text comments explaining why spec was reopened
+  isRejectExplanation?: boolean; // For plain text comments explaining why proposal was rejected
 }
 
 export interface BriefItem {

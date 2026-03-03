@@ -21,6 +21,7 @@ interface GlobalChatProps {
   onUpdateProvider: (id: string, provider: BriefItem['provider']) => void;
   onEdit: () => void;
   onReopen: (id: string, message: string) => void;
+  onReject: (id: string, message: string) => void;
   // Edit mode
   editingItem?: BriefItem | null;
   onSaveEdit: (id: string, updates: Partial<BriefItem>) => void;
@@ -35,7 +36,6 @@ const STATUS_STYLES: Record<ItemStatus, string> = {
   AGREED: 'bg-emerald-100 text-emerald-800 border-emerald-200',
   DISCUSSING: 'bg-amber-100 text-amber-800 border-amber-200',
   PENDING: 'bg-neutral-100 text-neutral-600 border-neutral-200',
-  REJECTED: 'bg-red-100 text-red-800 border-red-200',
 };
 
 const CATEGORY_LABEL: Record<Category, string> = {
@@ -199,7 +199,7 @@ const NewView: React.FC<{
 // ── Main component ────────────────────────────────────────────────────────────
 export const GlobalChat: React.FC<GlobalChatProps> = ({
   messages, role, onSendMessage, onSelectItem,
-  selectedItem, onCloseItem, onAddComment, onUpdateStatus, onUpdateProvider, onEdit, onReopen,
+  selectedItem, onCloseItem, onAddComment, onUpdateStatus, onUpdateProvider, onEdit, onReopen, onReject,
   editingItem, onSaveEdit, onCloseEdit,
   isNewItemOpen, onSaveNew, onCloseNew,
 }) => {
@@ -237,6 +237,7 @@ export const GlobalChat: React.FC<GlobalChatProps> = ({
         onUpdateStatus={onUpdateStatus}
         onEdit={onEdit}
         onReopen={onReopen}
+        onReject={onReject}
       />
     );
   }
