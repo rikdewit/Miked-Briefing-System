@@ -465,7 +465,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                         }`}>
                           {comment.role === 'BAND' ? <Music className="w-3 h-3 -mb-0.5" /> : <UserCog className="w-3 h-3" />}
                         </span>
-                        {comment.role === role ? 'You' : comment.author} updated brief •{' '}
+                        {comment.role === role ? 'You' : comment.author} proposed a change •{' '}
                         {new Date(comment.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </div>
                     </div>

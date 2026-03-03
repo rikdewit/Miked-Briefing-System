@@ -221,7 +221,7 @@ export const MOCK_ITEMS: BriefItem[] = [
         id: 'c-sax-2-1',
         author: 'Engineer',
         role: 'ENGINEER',
-        text: 'updated the brief:\nSpecs updated',
+        text: 'proposed a change:\nSpecs updated',
         timestamp: '2023-10-26T10:10:00Z',
         type: 'ITEM_REVISION',
         previousData: { specs: { make: 'AEA', model: 'E8', quantity: 1 } },
