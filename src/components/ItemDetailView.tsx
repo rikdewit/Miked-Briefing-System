@@ -530,6 +530,30 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                     </div>
                   );
                 }
+                if (comment.isCurrentSpecAgreement) {
+                  const isOwnComment = comment.role === role;
+                  return (
+                    <div key={comment.id} className={`flex flex-col w-full my-1 ${isOwnComment ? 'items-end' : 'items-start'}`}>
+                      <div className={`relative flex flex-col gap-0.5 ${isOwnComment ? 'self-end' : 'self-start'}`}>
+                        <div className={`absolute top-0 bottom-0 w-0.5 bg-emerald-400 ${isOwnComment ? 'right-0' : 'left-0'}`} />
+                        <div className={`flex flex-col ${isOwnComment ? 'pr-3' : 'pl-3'}`}>
+                          <div className="flex items-center gap-2">
+                            <span className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
+                              comment.role === 'BAND' ? 'bg-indigo-200 text-indigo-700' : 'bg-cyan-200 text-cyan-700'
+                            }`}>
+                              {comment.role === 'BAND' ? <Music className="w-3.5 h-3.5 -mb-0.5" /> : <UserCog className="w-3.5 h-3.5" />}
+                            </span>
+                            <CheckCircle className="w-5 h-5 shrink-0 text-emerald-600" />
+                            <span className="font-mono text-xs font-semibold">{isOwnComment ? 'You' : comment.author} agreed on current spec</span>
+                          </div>
+                          <span className="font-mono text-[10px] opacity-50 mt-0.5 ml-8">
+                            {new Date(comment.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
                 const bubbleStyle =
                   comment.role === 'BAND'
                     ? 'bg-indigo-100 text-indigo-900 border-indigo-300'

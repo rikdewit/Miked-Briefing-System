@@ -57,6 +57,7 @@ export interface Comment {
   };
   pendingUpdates?: Partial<BriefItem>; // For ITEM_REVISION: proposed changes (not yet applied to item)
   isReopenExplanation?: boolean; // For plain text comments explaining why spec was reopened
+  isCurrentSpecAgreement?: boolean; // For agreement comments marking confirmation of current spec
 }
 
 export interface BriefItem {
@@ -137,16 +138,17 @@ export const MOCK_GLOBAL_MESSAGES: ChatMessage[] = [
 ];
 
 export const MOCK_ITEMS: BriefItem[] = [
-  // Afke (Vocals)
+  // Afke (Vocals) - Example with reopen and current spec agreement
   {
     id: '1',
     category: 'MICROPHONES',
     title: 'Lead Vocal Mic',
     description: 'SM58 or comparable for Afke.',
     provider: 'ENGINEER',
-    status: 'AGREED',
+    status: 'PENDING',
     requestedBy: 'Afke',
     createdBy: 'BAND',
+    pendingConfirmationFrom: 'ENGINEER',
     assignedTo: 'Engineer',
     comments: [
       {
@@ -171,10 +173,27 @@ export const MOCK_ITEMS: BriefItem[] = [
         id: 'c-vocal-3',
         author: 'Afke',
         role: 'BAND',
-        text: 'changed status to AGREED',
+        text: 'agreed — waiting for Engineer confirmation',
         timestamp: '2023-10-26T10:21:00Z',
         type: 'STATUS_CHANGE',
-        newStatus: 'AGREED'
+        newStatus: 'PENDING',
+        waitingFor: 'ENGINEER'
+      },
+      {
+        id: 'c-vocal-4',
+        author: 'Engineer',
+        role: 'ENGINEER',
+        text: 'We might switch to a wireless version',
+        timestamp: '2023-10-26T10:35:00Z',
+        isReopenExplanation: true
+      },
+      {
+        id: 'c-vocal-5',
+        author: 'Afke',
+        role: 'BAND',
+        text: '',
+        timestamp: '2023-10-26T10:36:00Z',
+        isCurrentSpecAgreement: true
       }
     ],
     specs: { make: 'Shure', model: 'Beta 58A', quantity: 1 }
@@ -214,10 +233,9 @@ export const MOCK_ITEMS: BriefItem[] = [
     title: 'Sax Monitor',
     description: 'Dedicated ground monitor, stereo preferred.',
     provider: 'VENUE',
-    status: 'PENDING',
+    status: 'AGREED',
     requestedBy: 'Fabio',
     createdBy: 'BAND',
-    pendingConfirmationFrom: 'ENGINEER',
     assignedTo: 'Engineer',
     comments: [
       {
@@ -240,13 +258,23 @@ export const MOCK_ITEMS: BriefItem[] = [
         id: 'c-sax-mon-3',
         author: 'Fabio',
         role: 'BAND',
-        text: 'changed status to PENDING (waiting for ENGINEER)',
+        text: 'agreed — waiting for Engineer confirmation',
         timestamp: '2023-10-26T10:36:00Z',
         type: 'STATUS_CHANGE',
-        newStatus: 'PENDING'
+        newStatus: 'PENDING',
+        waitingFor: 'ENGINEER'
+      },
+      {
+        id: 'c-sax-mon-4',
+        author: 'Engineer',
+        role: 'ENGINEER',
+        text: '',
+        timestamp: '2023-10-26T10:37:00Z',
+        type: 'STATUS_CHANGE',
+        newStatus: 'AGREED'
       }
     ],
-    specs: { quantity: 1, notes: 'Stereo wedge' }
+    specs: { quantity: 1, notes: 'Mono wedge' }
   },
   // Abel (Guitar)
   {

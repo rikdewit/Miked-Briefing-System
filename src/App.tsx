@@ -109,25 +109,54 @@ function App() {
       itemSnapshot: { previousStatus: item.status, newStatus: actualNewStatus },
     });
 
-    const statusChangeComment: Comment = {
-      id: `sys-${Date.now()}`,
-      author: currentUserRole === 'BAND' ? 'Band' : 'Engineer',
-      role: currentUserRole,
-      text: pendingConfirmationFrom
-        ? `agreed — waiting for ${pendingConfirmationFrom} confirmation`
-        : `changed status to ${actualNewStatus}`,
-      timestamp: new Date().toISOString(),
-      type: 'STATUS_CHANGE',
-      newStatus: actualNewStatus,
-      waitingFor: pendingConfirmationFrom,
-    };
+    // Build comments array
+    let comments = [...item.comments];
+
+    // If confirming current spec from DISCUSSING, add first party's agreement marker
+    if (item.status === 'DISCUSSING' && actualNewStatus === 'PENDING') {
+      const currentSpecAgreementComment: Comment = {
+        id: `agree-${Date.now()}`,
+        author: currentUserRole === 'BAND' ? 'Band' : 'Engineer',
+        role: currentUserRole,
+        text: '',
+        timestamp: new Date().toISOString(),
+        isCurrentSpecAgreement: true,
+      };
+      comments.push(currentSpecAgreementComment);
+    } else if (item.status === 'PENDING' && actualNewStatus === 'AGREED' && item.pendingConfirmationFrom === currentUserRole) {
+      // When second party confirms (PENDING → AGREED), add agreement from both parties
+      const currentSpecAgreementComment: Comment = {
+        id: `agree-${Date.now()}`,
+        author: currentUserRole === 'BAND' ? 'Band' : 'Engineer',
+        role: currentUserRole,
+        text: '',
+        timestamp: new Date().toISOString(),
+        isCurrentSpecAgreement: true,
+      };
+      comments.push(currentSpecAgreementComment);
+    } else {
+      // For other transitions, add status change comment
+      const statusChangeComment: Comment = {
+        id: `sys-${Date.now()}`,
+        author: currentUserRole === 'BAND' ? 'Band' : 'Engineer',
+        role: currentUserRole,
+        text: pendingConfirmationFrom
+          ? `agreed — waiting for ${pendingConfirmationFrom} confirmation`
+          : `changed status to ${actualNewStatus}`,
+        timestamp: new Date().toISOString(),
+        type: 'STATUS_CHANGE',
+        newStatus: actualNewStatus,
+        waitingFor: pendingConfirmationFrom,
+      };
+      comments.push(statusChangeComment);
+    }
 
     const newItem = {
       ...item,
       ...(pendingEdits ?? {}),
       status: actualNewStatus,
       pendingConfirmationFrom,
-      comments: [...item.comments, statusChangeComment],
+      comments,
     };
 
     setItems(prev => prev.map(i => i.id === id ? newItem : i));
