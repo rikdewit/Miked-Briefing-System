@@ -500,7 +500,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                   const isOwnComment = comment.role === role;
                   // Check if this agreement is after a reopen (look for isReopenExplanation before this comment)
                   const hasReopenBefore = item.comments.slice(0, item.comments.indexOf(comment)).some(c => c.isReopenExplanation);
-                  const agreementText = hasReopenBefore ? 'agreed on current spec' : 'agrees';
+                  const agreementText = hasReopenBefore ? 'agreed on current spec' : isOwnComment ? 'agree' : 'agrees';
 
                   return (
                     <div key={comment.id} className={`flex flex-col w-full my-1 ${isOwnComment ? 'items-end' : 'items-start'}`}>
