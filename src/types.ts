@@ -233,9 +233,10 @@ export const MOCK_ITEMS: BriefItem[] = [
     title: 'Sax FX DI (Fabio)',
     description: 'For pedal FX sound. Stereo DI or 2x mono for pedalboard.',
     provider: 'ENGINEER',
-    status: 'DISCUSSING',
+    status: 'PENDING',
     requestedBy: 'Fabio',
     createdBy: 'BAND',
+    pendingConfirmationFrom: 'ENGINEER',
     assignedTo: 'Engineer',
     comments: [
       {
@@ -253,9 +254,39 @@ export const MOCK_ITEMS: BriefItem[] = [
         text: 'I can do stereo DI. Will set that up for you.',
         timestamp: '2025-03-01T14:45:00Z',
         type: 'TEXT'
+      },
+      {
+        id: 'c-fx-3',
+        author: 'Engineer',
+        role: 'ENGINEER',
+        text: 'updated the brief:\nSpecs updated',
+        timestamp: '2025-03-01T15:10:00Z',
+        type: 'ITEM_REVISION',
+        previousData: { specs: { quantity: 1, notes: 'Stereo DI for FX pedal' } },
+        newData: { specs: { quantity: 2, notes: '2x Radial ProD2 active DI boxes for best isolation' } },
+        waitingFor: 'BAND',
+        pendingUpdates: { specs: { quantity: 2, notes: '2x Radial ProD2 active DI boxes for best isolation' } }
+      },
+      {
+        id: 'c-fx-4',
+        author: 'Fabio',
+        role: 'BAND',
+        text: 'Ah, dual DI boxes - that makes sense for stereo separation. Much better than a single stereo unit!',
+        timestamp: '2025-03-01T15:12:00Z',
+        type: 'TEXT'
+      },
+      {
+        id: 'c-fx-5',
+        author: 'Fabio',
+        role: 'BAND',
+        text: 'agreed — waiting for Engineer confirmation',
+        timestamp: '2025-03-01T15:13:00Z',
+        type: 'STATUS_CHANGE',
+        newStatus: 'PENDING',
+        waitingFor: 'ENGINEER'
       }
     ],
-    specs: { quantity: 1, notes: 'Stereo DI for FX pedal' }
+    specs: { quantity: 2, notes: '2x Radial ProD2 active DI boxes for best isolation' }
   },
 
   // Fabio (Tenor Sax) - Monitor
@@ -265,10 +296,9 @@ export const MOCK_ITEMS: BriefItem[] = [
     title: 'Sax Ground Monitor (Fabio)',
     description: 'Dedicated ground monitor for sax. Stereo preferred.',
     provider: 'VENUE',
-    status: 'PENDING',
+    status: 'DISCUSSING',
     requestedBy: 'Fabio',
     createdBy: 'BAND',
-    pendingConfirmationFrom: 'ENGINEER',
     assignedTo: 'Engineer',
     comments: [
       {
@@ -281,16 +311,34 @@ export const MOCK_ITEMS: BriefItem[] = [
       },
       {
         id: 'c-mon-2',
+        author: 'Engineer',
+        role: 'ENGINEER',
+        text: 'updated the brief:\nSpecs updated',
+        timestamp: '2025-03-01T15:05:00Z',
+        type: 'ITEM_REVISION',
+        previousData: { specs: { quantity: 1, notes: 'Stereo wedge preferred' } },
+        newData: { specs: { quantity: 1, notes: 'Mono wedge - we only have one monitor output available' } },
+        waitingFor: 'BAND',
+        pendingUpdates: { specs: { quantity: 1, notes: 'Mono wedge - we only have one monitor output available' } }
+      },
+      {
+        id: 'c-mon-3',
         author: 'Fabio',
         role: 'BAND',
-        text: 'agreed — waiting for Engineer confirmation',
-        timestamp: '2025-03-01T14:27:00Z',
-        type: 'STATUS_CHANGE',
-        newStatus: 'PENDING',
-        waitingFor: 'ENGINEER'
+        text: 'Mono is fine. Can we at least get the wedge stage right where I can hear it well?',
+        timestamp: '2025-03-01T15:08:00Z',
+        type: 'TEXT'
+      },
+      {
+        id: 'c-mon-4',
+        author: 'Engineer',
+        role: 'ENGINEER',
+        text: 'Perfect. I can place it stage right, angled toward you. You\'ll have a clear monitor mix.',
+        timestamp: '2025-03-01T15:09:00Z',
+        type: 'TEXT'
       }
     ],
-    specs: { quantity: 1, notes: 'Stereo wedge preferred' }
+    specs: { quantity: 1, notes: 'Mono wedge, stage right position' }
   },
 
   // Abel (Guitar) - Amp
@@ -350,7 +398,7 @@ export const MOCK_ITEMS: BriefItem[] = [
     specs: { make: 'Shure', model: 'SM57', quantity: 1 }
   },
 
-  // Abel (Guitar) - Power
+  // Abel (Guitar) - Power - WITH REOPEN FLOW
   {
     id: '7',
     category: 'POWER',
@@ -361,18 +409,83 @@ export const MOCK_ITEMS: BriefItem[] = [
     requestedBy: 'Abel',
     createdBy: 'BAND',
     assignedTo: 'Engineer',
-    comments: [],
-    specs: { quantity: 1, notes: 'Stage left area' }
+    comments: [
+      {
+        id: 'c-power-1',
+        author: 'Abel',
+        role: 'BAND',
+        text: 'Need one power point stage left for the pedalboard.',
+        timestamp: '2025-03-01T14:19:00Z',
+        type: 'TEXT'
+      },
+      {
+        id: 'c-power-2',
+        author: 'Engineer',
+        role: 'ENGINEER',
+        text: 'Stage left power is confirmed.',
+        timestamp: '2025-03-01T14:20:00Z',
+        type: 'TEXT'
+      },
+      {
+        id: 'c-power-3',
+        author: 'Abel',
+        role: 'BAND',
+        text: '',
+        timestamp: '2025-03-01T14:21:00Z',
+        isCurrentSpecAgreement: true
+      },
+      {
+        id: 'c-power-4',
+        author: 'Engineer',
+        role: 'ENGINEER',
+        text: '',
+        timestamp: '2025-03-01T14:22:00Z',
+        isCurrentSpecAgreement: true
+      },
+      {
+        id: 'c-power-5',
+        author: 'Engineer',
+        role: 'ENGINEER',
+        text: 'Actually, I need to know: will you need a USB extension cable too, or just the power?',
+        timestamp: '2025-03-01T16:00:00Z',
+        isReopenExplanation: true
+      },
+      {
+        id: 'c-power-6',
+        author: 'Abel',
+        role: 'BAND',
+        text: "No, just power. I bring my own cables and everything else. Just the outlet is what I need.",
+        timestamp: '2025-03-01T16:02:00Z',
+        type: 'TEXT'
+      },
+      {
+        id: 'c-power-7',
+        author: 'Abel',
+        role: 'BAND',
+        text: '',
+        timestamp: '2025-03-01T16:03:00Z',
+        isCurrentSpecAgreement: true
+      },
+      {
+        id: 'c-power-8',
+        author: 'Engineer',
+        role: 'ENGINEER',
+        text: '',
+        timestamp: '2025-03-01T16:04:00Z',
+        isCurrentSpecAgreement: true
+      }
+    ],
+    specs: { quantity: 1, notes: 'Stage left area - power only' }
   },
 
-  // Lester (Bass) - Bass Amp
+  // Lester (Bass) - Bass Amp - WITH REVISION PROPOSAL
   {
     id: '8',
     category: 'BACKLINE',
     title: 'Bass Amp (Lester)',
     description: 'If backline is available, we prefer to use it. Otherwise we bring our own.',
     provider: 'VENUE',
-    status: 'DISCUSSING',
+    status: 'AGREED',
     requestedBy: 'Lester',
     createdBy: 'BAND',
     assignedTo: 'Engineer',
@@ -389,12 +502,40 @@ export const MOCK_ITEMS: BriefItem[] = [
         id: 'c-bass-2',
         author: 'Engineer',
         role: 'ENGINEER',
-        text: 'We have a Markbass combo available. Good for your needs?',
+        text: 'updated the brief:\nSpecs updated',
         timestamp: '2025-03-01T14:35:00Z',
+        type: 'ITEM_REVISION',
+        previousData: { specs: { notes: 'House amp or band gear' } },
+        newData: { specs: { make: 'Markbass', model: 'Combo 102P', quantity: 1, notes: 'Solid 200W combo, great for intimate venues' } },
+        waitingFor: 'BAND',
+        pendingUpdates: { specs: { make: 'Markbass', model: 'Combo 102P', quantity: 1, notes: 'Solid 200W combo, great for intimate venues' } }
+      },
+      {
+        id: 'c-bass-3',
+        author: 'Lester',
+        role: 'BAND',
+        text: "The Markbass combo is a solid choice. I've used that model before and it's reliable. Perfect for our needs.",
+        timestamp: '2025-03-01T14:37:00Z',
         type: 'TEXT'
+      },
+      {
+        id: 'c-bass-4',
+        author: 'Lester',
+        role: 'BAND',
+        text: '',
+        timestamp: '2025-03-01T14:38:00Z',
+        isCurrentSpecAgreement: true
+      },
+      {
+        id: 'c-bass-5',
+        author: 'Engineer',
+        role: 'ENGINEER',
+        text: '',
+        timestamp: '2025-03-01T14:39:00Z',
+        isCurrentSpecAgreement: true
       }
     ],
-    specs: { notes: 'House amp or band gear' }
+    specs: { make: 'Markbass', model: 'Combo 102P', quantity: 1, notes: 'Solid 200W combo, great for intimate venues' }
   },
 
   // Lester (Bass) - Amp Mic
@@ -413,7 +554,7 @@ export const MOCK_ITEMS: BriefItem[] = [
     specs: { make: 'Shure', model: 'SM7B', quantity: 1 }
   },
 
-  // Lester (Bass) - Power
+  // Lester (Bass) - Power - WITH REOPEN (BAND-INITIATED)
   {
     id: '10',
     category: 'POWER',
@@ -424,8 +565,81 @@ export const MOCK_ITEMS: BriefItem[] = [
     requestedBy: 'Lester',
     createdBy: 'BAND',
     assignedTo: 'Engineer',
-    comments: [],
-    specs: { quantity: 1, notes: 'Stage right area' }
+    comments: [
+      {
+        id: 'c-bass-power-1',
+        author: 'Lester',
+        role: 'BAND',
+        text: 'Need stage right power for bass rig. Two outlets if possible for redundancy.',
+        timestamp: '2025-03-01T14:19:00Z',
+        type: 'TEXT'
+      },
+      {
+        id: 'c-bass-power-2',
+        author: 'Engineer',
+        role: 'ENGINEER',
+        text: 'Stage right only has one outlet available, but it has solid grounding.',
+        timestamp: '2025-03-01T14:21:00Z',
+        type: 'TEXT'
+      },
+      {
+        id: 'c-bass-power-3',
+        author: 'Lester',
+        role: 'BAND',
+        text: '',
+        timestamp: '2025-03-01T14:23:00Z',
+        isCurrentSpecAgreement: true
+      },
+      {
+        id: 'c-bass-power-4',
+        author: 'Engineer',
+        role: 'ENGINEER',
+        text: '',
+        timestamp: '2025-03-01T14:25:00Z',
+        isCurrentSpecAgreement: true
+      },
+      {
+        id: 'c-bass-power-5',
+        author: 'Lester',
+        role: 'BAND',
+        text: 'Wait, just confirmed with the rest of the band — can we add a second outlet? We can bring a quality power strip if needed.',
+        timestamp: '2025-03-01T15:45:00Z',
+        isReopenExplanation: true
+      },
+      {
+        id: 'c-bass-power-6',
+        author: 'Engineer',
+        role: 'ENGINEER',
+        text: 'Good news! I can run a stage box with two outlets to stage right. Much cleaner than a power strip.',
+        timestamp: '2025-03-01T15:47:00Z',
+        type: 'TEXT'
+      },
+      {
+        id: 'c-bass-power-7',
+        author: 'Lester',
+        role: 'BAND',
+        text: 'Perfect! That sounds even better.',
+        timestamp: '2025-03-01T15:48:00Z',
+        type: 'TEXT'
+      },
+      {
+        id: 'c-bass-power-8',
+        author: 'Lester',
+        role: 'BAND',
+        text: '',
+        timestamp: '2025-03-01T15:49:00Z',
+        isCurrentSpecAgreement: true
+      },
+      {
+        id: 'c-bass-power-9',
+        author: 'Engineer',
+        role: 'ENGINEER',
+        text: '',
+        timestamp: '2025-03-01T15:50:00Z',
+        isCurrentSpecAgreement: true
+      }
+    ],
+    specs: { quantity: 2, notes: 'Stage right area - stage box with dual outlets' }
   },
 
   // Youri (Drums) - Jazz Drumkit
@@ -459,13 +673,43 @@ export const MOCK_ITEMS: BriefItem[] = [
     title: 'Drum Monitor (Youri)',
     description: 'Dedicated monitor for drums.',
     provider: 'VENUE',
-    status: 'PENDING',
+    status: 'DISCUSSING',
     requestedBy: 'Youri',
     createdBy: 'BAND',
-    pendingConfirmationFrom: 'ENGINEER',
     assignedTo: 'Engineer',
-    comments: [],
-    specs: { quantity: 1, notes: 'For kick drum and bass reference' }
+    comments: [
+      {
+        id: 'c-drum-mon-1',
+        author: 'Engineer',
+        role: 'ENGINEER',
+        text: 'updated the brief:\nDescription updated',
+        timestamp: '2025-03-01T15:15:00Z',
+        type: 'ITEM_REVISION',
+        previousData: { specs: { quantity: 1, notes: 'For kick drum and bass reference' } },
+        newData: { specs: { quantity: 2, notes: 'Small wedge behind kit for click/kick. Second larger wedge for full mix' } },
+        waitingFor: 'BAND',
+        pendingUpdates: { specs: { quantity: 2, notes: 'Small wedge behind kit for click/kick. Second larger wedge for full mix' } }
+      },
+      {
+        id: 'c-drum-mon-2',
+        author: 'Youri',
+        role: 'BAND',
+        text: 'Actually, two monitors sounds perfect! That setup gives me way better control over what I hear.',
+        timestamp: '2025-03-01T15:17:00Z',
+        type: 'TEXT'
+      },
+      {
+        id: 'c-drum-mon-3',
+        author: 'Youri',
+        role: 'BAND',
+        text: 'agreed — waiting for Engineer confirmation',
+        timestamp: '2025-03-01T15:18:00Z',
+        type: 'STATUS_CHANGE',
+        newStatus: 'PENDING',
+        waitingFor: 'ENGINEER'
+      }
+    ],
+    specs: { quantity: 2, notes: 'Small wedge behind kit for click/kick. Second larger wedge for full mix' }
   },
 
   // Stage Setup
