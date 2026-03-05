@@ -85,65 +85,65 @@ export const MOCK_GLOBAL_MESSAGES: ChatMessage[] = [
     id: 'g1',
     author: 'Afke',
     role: 'BAND',
-    text: 'Hi! Will there be a green room available for before the show?',
-    timestamp: '2023-10-26T09:28:00Z',
+    text: 'Hi! Sending the brief for Afke Flaviana: The Spoken Quintet tour. Let me know if you have questions about our setup.',
+    timestamp: '2025-03-01T14:00:00Z',
   },
   {
     id: 'g2',
     author: 'Engineer',
     role: 'ENGINEER',
-    text: "Yes, there's a small room backstage. I'll add hospitality items to the brief.",
-    timestamp: '2023-10-26T09:33:00Z',
+    text: 'Thanks for the details! I have most of the mics we need. Just checking on the jazz drumkit availability for Youri.',
+    timestamp: '2025-03-01T14:15:00Z',
   },
   {
     id: 'g3',
     author: 'System',
     role: 'BAND',
     text: '',
-    timestamp: '2023-10-26T10:00:00Z',
+    timestamp: '2025-03-01T14:30:00Z',
     isSystemUpdate: true,
-    itemId: '7',
-    itemTitle: 'Bass Amp',
+    itemId: '5',
+    itemTitle: 'Jazz Drumkit',
     itemCategory: 'BACKLINE',
     updateType: 'STATUS_CHANGE',
     itemSnapshot: { previousStatus: 'PENDING', newStatus: 'DISCUSSING' },
   },
   {
     id: 'g4',
-    author: 'Lester',
+    author: 'Youri',
     role: 'BAND',
-    text: 'Just flagged the bass amp — hoping the venue has something decent.',
-    timestamp: '2023-10-26T10:01:00Z',
+    text: 'We prefer the house kit if available to save travel space. Otherwise we bring our own.',
+    timestamp: '2025-03-01T14:32:00Z',
   },
   {
     id: 'g5',
     author: 'System',
-    role: 'ENGINEER',
+    role: 'BAND',
     text: '',
-    timestamp: '2023-10-26T10:16:00Z',
+    timestamp: '2025-03-01T14:50:00Z',
     isSystemUpdate: true,
-    itemId: '4',
-    itemTitle: 'Sax Monitor',
-    itemCategory: 'MONITORING',
+    itemId: '9',
+    itemTitle: 'Sax FX DI',
+    itemCategory: 'MICROPHONES',
     updateType: 'STATUS_CHANGE',
     itemSnapshot: { previousStatus: 'PENDING', newStatus: 'DISCUSSING' },
   },
   {
     id: 'g6',
-    author: 'Engineer',
-    role: 'ENGINEER',
-    text: 'Heads up — I can only do mono monitors tonight. Should be fine for sax.',
-    timestamp: '2023-10-26T10:17:00Z',
+    author: 'Fabio',
+    role: 'BAND',
+    text: 'For the FX pedal, stereo is preferred but 2x mono works too if thats easier to set up.',
+    timestamp: '2025-03-01T14:52:00Z',
   },
 ];
 
 export const MOCK_ITEMS: BriefItem[] = [
-  // Afke (Vocals) - Example with reopen and mutual agreement
+  // Afke (Vocals)
   {
     id: '1',
     category: 'MICROPHONES',
-    title: 'Lead Vocal Mic',
-    description: 'SM58 or comparable for Afke.',
+    title: 'Lead Vocal Mic (Afke)',
+    description: 'SM58 or comparable. Afke needs this for vocals.',
     provider: 'ENGINEER',
     status: 'AGREED',
     requestedBy: 'Afke',
@@ -154,62 +154,35 @@ export const MOCK_ITEMS: BriefItem[] = [
         id: 'c-vocal-1',
         author: 'Engineer',
         role: 'ENGINEER',
-        text: 'changed specs to Shure Beta 58A',
-        timestamp: '2023-10-26T10:15:00Z',
-        type: 'ITEM_REVISION',
-        previousData: { specs: { make: 'Shure', model: 'SM58', quantity: 1 } },
-        newData: { specs: { make: 'Shure', model: 'Beta 58A', quantity: 1 } }
+        text: 'I have a Shure SM58 ready. Should work great for vocals.',
+        timestamp: '2025-03-01T14:05:00Z',
+        type: 'TEXT'
       },
       {
         id: 'c-vocal-2',
         author: 'Afke',
         role: 'BAND',
-        text: 'even better!',
-        timestamp: '2023-10-26T10:20:00Z',
-        type: 'TEXT'
+        text: '',
+        timestamp: '2025-03-01T14:10:00Z',
+        isCurrentSpecAgreement: true
       },
       {
         id: 'c-vocal-3',
-        author: 'Afke',
-        role: 'BAND',
-        text: 'agreed — waiting for Engineer confirmation',
-        timestamp: '2023-10-26T10:21:00Z',
-        type: 'STATUS_CHANGE',
-        newStatus: 'PENDING',
-        waitingFor: 'ENGINEER'
-      },
-      {
-        id: 'c-vocal-4',
-        author: 'Engineer',
-        role: 'ENGINEER',
-        text: 'We might switch to a wireless version',
-        timestamp: '2023-10-26T10:35:00Z',
-        isReopenExplanation: true
-      },
-      {
-        id: 'c-vocal-5',
-        author: 'Afke',
-        role: 'BAND',
-        text: '',
-        timestamp: '2023-10-26T10:36:00Z',
-        isCurrentSpecAgreement: true
-      },
-      {
-        id: 'c-vocal-6',
         author: 'Engineer',
         role: 'ENGINEER',
         text: '',
-        timestamp: '2023-10-26T10:37:00Z',
+        timestamp: '2025-03-01T14:12:00Z',
         isCurrentSpecAgreement: true
       }
     ],
-    specs: { make: 'Shure', model: 'Beta 58A', quantity: 1 }
+    specs: { make: 'Shure', model: 'SM58', quantity: 1 }
   },
-  // Fabio (Sax)
+
+  // Fabio (Tenor Sax) - Acoustic Mic
   {
     id: '2',
     category: 'MICROPHONES',
-    title: 'Tenor Sax Mic (Acoustic)',
+    title: 'Sax Mic - Acoustic (Fabio)',
     description: 'For acoustic sound. Prefer AEA E8 NUVO, otherwise AKG 414 XLII.',
     provider: 'ENGINEER',
     status: 'AGREED',
@@ -218,122 +191,145 @@ export const MOCK_ITEMS: BriefItem[] = [
     assignedTo: 'Engineer',
     comments: [
       {
-        id: 'c-sax-2-1',
+        id: 'c-sax-1',
         author: 'Engineer',
         role: 'ENGINEER',
-        text: 'proposed a change:\nSpecs updated',
-        timestamp: '2023-10-26T10:10:00Z',
-        type: 'ITEM_REVISION',
-        previousData: { specs: { make: 'AEA', model: 'E8', quantity: 1 } },
-        newData: { specs: { make: 'AEA', model: 'E8 NUVO', quantity: 1 } }
-      },
-      {
-        id: 'c-sax-2-2',
-        author: 'Fabio',
-        role: 'BAND',
-        text: 'perfect upgrade!',
-        timestamp: '2023-10-26T10:11:00Z',
+        text: 'I have the AEA E8 NUVO available. Perfect choice for tenor sax.',
+        timestamp: '2025-03-01T14:08:00Z',
         type: 'TEXT'
       },
       {
-        id: 'c-sax-2-3',
+        id: 'c-sax-2',
+        author: 'Fabio',
+        role: 'BAND',
+        text: "Excellent! That's exactly what we need.",
+        timestamp: '2025-03-01T14:10:00Z',
+        type: 'TEXT'
+      },
+      {
+        id: 'c-sax-3',
         author: 'Fabio',
         role: 'BAND',
         text: '',
-        timestamp: '2023-10-26T10:12:00Z',
+        timestamp: '2025-03-01T14:11:00Z',
         isCurrentSpecAgreement: true
       },
       {
-        id: 'c-sax-2-4',
+        id: 'c-sax-4',
         author: 'Engineer',
         role: 'ENGINEER',
         text: '',
-        timestamp: '2023-10-26T10:13:00Z',
+        timestamp: '2025-03-01T14:13:00Z',
         isCurrentSpecAgreement: true
       }
     ],
     specs: { make: 'AEA', model: 'E8 NUVO', quantity: 1 }
   },
+
+  // Fabio (Tenor Sax) - FX DI
   {
     id: '3',
     category: 'MICROPHONES',
-    title: 'Sax FX DI',
-    description: 'For pedal FX sound. Stereo DI or 2x Mono.',
+    title: 'Sax FX DI (Fabio)',
+    description: 'For pedal FX sound. Stereo DI or 2x mono for pedalboard.',
     provider: 'ENGINEER',
-    status: 'PENDING',
-    requestedBy: 'Fabio',
-    createdBy: 'BAND',
-    pendingConfirmationFrom: 'ENGINEER',
-    assignedTo: 'Engineer',
-    comments: [],
-    specs: { quantity: 2, notes: 'Stereo DI' }
-  },
-  {
-    id: '4',
-    category: 'MONITORING',
-    title: 'Sax Monitor',
-    description: 'Dedicated ground monitor, stereo preferred.',
-    provider: 'VENUE',
-    status: 'AGREED',
+    status: 'DISCUSSING',
     requestedBy: 'Fabio',
     createdBy: 'BAND',
     assignedTo: 'Engineer',
     comments: [
       {
-        id: 'c-sax-mon-1',
-        author: 'Engineer',
-        role: 'ENGINEER',
-        text: "I can't do stereo monitors, is mono okay?",
-        timestamp: '2023-10-26T10:30:00Z',
-        type: 'TEXT'
-      },
-      {
-        id: 'c-sax-mon-2',
+        id: 'c-fx-1',
         author: 'Fabio',
         role: 'BAND',
-        text: "That's fine.",
-        timestamp: '2023-10-26T10:35:00Z',
+        text: 'We need a DI for the FX pedal output. Stereo is preferred but 2x mono works too.',
+        timestamp: '2025-03-01T14:30:00Z',
         type: 'TEXT'
       },
       {
-        id: 'c-sax-mon-3',
+        id: 'c-fx-2',
+        author: 'Engineer',
+        role: 'ENGINEER',
+        text: 'I can do stereo DI. Will set that up for you.',
+        timestamp: '2025-03-01T14:45:00Z',
+        type: 'TEXT'
+      }
+    ],
+    specs: { quantity: 1, notes: 'Stereo DI for FX pedal' }
+  },
+
+  // Fabio (Tenor Sax) - Monitor
+  {
+    id: '4',
+    category: 'MONITORING',
+    title: 'Sax Ground Monitor (Fabio)',
+    description: 'Dedicated ground monitor for sax. Stereo preferred.',
+    provider: 'VENUE',
+    status: 'PENDING',
+    requestedBy: 'Fabio',
+    createdBy: 'BAND',
+    pendingConfirmationFrom: 'ENGINEER',
+    assignedTo: 'Engineer',
+    comments: [
+      {
+        id: 'c-mon-1',
+        author: 'Fabio',
+        role: 'BAND',
+        text: 'I really need a dedicated monitor to hear myself properly. Stereo is ideal.',
+        timestamp: '2025-03-01T14:25:00Z',
+        type: 'TEXT'
+      },
+      {
+        id: 'c-mon-2',
         author: 'Fabio',
         role: 'BAND',
         text: 'agreed — waiting for Engineer confirmation',
-        timestamp: '2023-10-26T10:36:00Z',
+        timestamp: '2025-03-01T14:27:00Z',
         type: 'STATUS_CHANGE',
         newStatus: 'PENDING',
         waitingFor: 'ENGINEER'
+      }
+    ],
+    specs: { quantity: 1, notes: 'Stereo wedge preferred' }
+  },
+
+  // Abel (Guitar) - Amp
+  {
+    id: '5',
+    category: 'BACKLINE',
+    title: 'Koch Jupiter Amp (Abel)',
+    description: 'Abel brings his own Koch Jupiter amp.',
+    provider: 'BAND',
+    status: 'AGREED',
+    requestedBy: 'Abel',
+    createdBy: 'BAND',
+    assignedTo: 'Engineer',
+    comments: [
+      {
+        id: 'c-amp-1',
+        author: 'Abel',
+        role: 'BAND',
+        text: 'I bring my own Koch Jupiter. Just need to mic it up.',
+        timestamp: '2025-03-01T14:20:00Z',
+        type: 'TEXT'
       },
       {
-        id: 'c-sax-mon-4',
+        id: 'c-amp-2',
         author: 'Engineer',
         role: 'ENGINEER',
         text: '',
-        timestamp: '2023-10-26T10:37:00Z',
-        type: 'STATUS_CHANGE',
-        newStatus: 'AGREED'
+        timestamp: '2025-03-01T14:22:00Z',
+        isCurrentSpecAgreement: true
       }
     ],
-    specs: { quantity: 1, notes: 'Mono wedge' }
+    specs: { make: 'Koch', model: 'Jupiter', quantity: 1 }
   },
-  // Abel (Guitar)
-  {
-    id: '5',
-    category: 'POWER',
-    title: 'Guitar Power',
-    description: 'Power point for Pedalboard.',
-    provider: 'VENUE',
-    status: 'AGREED',
-    requestedBy: 'Abel',
-    assignedTo: 'Engineer',
-    comments: [],
-    specs: { quantity: 1 }
-  },
+
+  // Abel (Guitar) - Amp Mic
   {
     id: '6',
     category: 'MICROPHONES',
-    title: 'Guitar Amp Mic',
+    title: 'Guitar Amp Mic (Abel)',
     description: 'Mic for Koch Jupiter amp.',
     provider: 'ENGINEER',
     status: 'PENDING',
@@ -341,158 +337,221 @@ export const MOCK_ITEMS: BriefItem[] = [
     createdBy: 'BAND',
     pendingConfirmationFrom: 'ENGINEER',
     assignedTo: 'Engineer',
-    comments: [],
-    specs: { quantity: 1 }
+    comments: [
+      {
+        id: 'c-guitar-mic-1',
+        author: 'Engineer',
+        role: 'ENGINEER',
+        text: 'I will mic your amp with a Shure SM57. Standard setup for guitar.',
+        timestamp: '2025-03-01T14:23:00Z',
+        type: 'TEXT'
+      }
+    ],
+    specs: { make: 'Shure', model: 'SM57', quantity: 1 }
   },
-  {
-    id: '6b',
-    category: 'BACKLINE',
-    title: 'Koch Jupiter Amp',
-    description: 'Abel brings his own amp.',
-    provider: 'BAND',
-    status: 'AGREED',
-    requestedBy: 'Abel',
-    assignedTo: 'Engineer',
-    comments: [],
-    specs: { make: 'Koch', model: 'Jupiter', quantity: 1 }
-  },
-  // Lester (Bass)
+
+  // Abel (Guitar) - Power
   {
     id: '7',
+    category: 'POWER',
+    title: 'Guitar Pedalboard Power (Abel)',
+    description: 'Power point for Abel pedalboard.',
+    provider: 'VENUE',
+    status: 'AGREED',
+    requestedBy: 'Abel',
+    createdBy: 'BAND',
+    assignedTo: 'Engineer',
+    comments: [],
+    specs: { quantity: 1, notes: 'Stage left area' }
+  },
+
+  // Lester (Bass) - Bass Amp
+  {
+    id: '8',
     category: 'BACKLINE',
-    title: 'Bass Amp',
-    description: 'If backline is available, we would like to use it. Otherwise we bring our own.',
+    title: 'Bass Amp (Lester)',
+    description: 'If backline is available, we prefer to use it. Otherwise we bring our own.',
     provider: 'VENUE',
     status: 'DISCUSSING',
     requestedBy: 'Lester',
+    createdBy: 'BAND',
     assignedTo: 'Engineer',
     comments: [
       {
-        id: 'c1',
+        id: 'c-bass-1',
         author: 'Lester',
         role: 'BAND',
-        text: 'Do you have a bass amp available?',
-        timestamp: '2023-10-26T10:00:00Z'
+        text: 'Do you have a decent bass amp available? We can bring our own if needed.',
+        timestamp: '2025-03-01T14:18:00Z',
+        type: 'TEXT'
+      },
+      {
+        id: 'c-bass-2',
+        author: 'Engineer',
+        role: 'ENGINEER',
+        text: 'We have a Markbass combo available. Good for your needs?',
+        timestamp: '2025-03-01T14:35:00Z',
+        type: 'TEXT'
       }
     ],
-    specs: { notes: 'House amp preferred' }
+    specs: { notes: 'House amp or band gear' }
   },
+
+  // Lester (Bass) - Amp Mic
   {
-    id: '8',
+    id: '9',
+    category: 'MICROPHONES',
+    title: 'Bass Amp Mic (Lester)',
+    description: 'Mic for bass amp.',
+    provider: 'ENGINEER',
+    status: 'PENDING',
+    requestedBy: 'Lester',
+    createdBy: 'BAND',
+    pendingConfirmationFrom: 'ENGINEER',
+    assignedTo: 'Engineer',
+    comments: [],
+    specs: { make: 'Shure', model: 'SM7B', quantity: 1 }
+  },
+
+  // Lester (Bass) - Power
+  {
+    id: '10',
     category: 'POWER',
-    title: 'Bass Power',
-    description: 'Power point for Pedalboard.',
+    title: 'Bass Pedalboard Power (Lester)',
+    description: 'Power point for Lester pedalboard.',
     provider: 'VENUE',
     status: 'AGREED',
     requestedBy: 'Lester',
+    createdBy: 'BAND',
     assignedTo: 'Engineer',
     comments: [],
-    specs: { quantity: 1 }
+    specs: { quantity: 1, notes: 'Stage right area' }
   },
-  // Youri (Drums)
+
+  // Youri (Drums) - Jazz Drumkit
   {
-    id: '9',
+    id: '11',
     category: 'BACKLINE',
-    title: 'Drum Kit',
-    description: 'If jazz drumkit is available, we would like to use it. Otherwise we bring our own.',
+    title: 'Jazz Drumkit (Youri)',
+    description: 'If jazz drumkit is available at the venue, we prefer to use it to save travel space.',
     provider: 'VENUE',
     status: 'DISCUSSING',
     requestedBy: 'Youri',
+    createdBy: 'BAND',
     assignedTo: 'Engineer',
     comments: [
-       {
-        id: 'c2',
+      {
+        id: 'c-drums-1',
         author: 'Youri',
         role: 'BAND',
-        text: 'Prefer house kit to save travel space.',
-        timestamp: '2023-10-26T10:05:00Z'
+        text: 'Prefer a house jazz kit if available to save transport space. Otherwise we bring our own.',
+        timestamp: '2025-03-01T14:20:00Z',
+        type: 'TEXT'
       }
     ],
-    specs: { notes: 'Jazz kit' }
+    specs: { notes: 'Jazz configuration (22" kick, smaller tom sizes)' }
   },
-  // General / Hospitality
+
+  // Youri (Drums) - Drum Monitoring
   {
-    id: '10',
+    id: '12',
+    category: 'MONITORING',
+    title: 'Drum Monitor (Youri)',
+    description: 'Dedicated monitor for drums.',
+    provider: 'VENUE',
+    status: 'PENDING',
+    requestedBy: 'Youri',
+    createdBy: 'BAND',
+    pendingConfirmationFrom: 'ENGINEER',
+    assignedTo: 'Engineer',
+    comments: [],
+    specs: { quantity: 1, notes: 'For kick drum and bass reference' }
+  },
+
+  // Stage Setup
+  {
+    id: '13',
     category: 'STAGE',
     title: 'Music Stands',
-    description: 'If available, we would like to use them.',
+    description: 'If available, we would like to use music stands.',
     provider: 'VENUE',
     status: 'PENDING',
     requestedBy: 'Band',
     createdBy: 'BAND',
     pendingConfirmationFrom: 'ENGINEER',
     assignedTo: 'Engineer',
-    comments: [],
-    specs: { quantity: 5 }
+    comments: [
+      {
+        id: 'c-stands-1',
+        author: 'Engineer',
+        role: 'ENGINEER',
+        text: 'Do you need these for sheet music during the set?',
+        timestamp: '2025-03-01T14:40:00Z',
+        type: 'TEXT'
+      }
+    ],
+    specs: { quantity: 5, notes: 'For Afke, Fabio, Abel, Lester, and spare' }
   },
+
+  // Hospitality
   {
-    id: '11',
+    id: '14',
+    category: 'HOSPITALITY',
+    title: 'Beverages & Catering',
+    description: 'Water, coffee, and drinks during setup and show.',
+    provider: 'VENUE',
+    status: 'PENDING',
+    requestedBy: 'Band',
+    createdBy: 'BAND',
+    pendingConfirmationFrom: 'ENGINEER',
+    assignedTo: 'Engineer',
+    comments: [
+      {
+        id: 'c-drinks-1',
+        author: 'Engineer',
+        role: 'ENGINEER',
+        text: 'I can arrange water and coffee. Will prepare it before soundcheck.',
+        timestamp: '2025-03-01T14:50:00Z',
+        type: 'TEXT'
+      }
+    ],
+    specs: { notes: '5 band members + water, coffee, tea' }
+  },
+
+  {
+    id: '15',
     category: 'HOSPITALITY',
     title: 'Crew Meals',
-    description: '4x no restrictions, 1x vegan.',
+    description: '4x no dietary restrictions, 1x vegan.',
     provider: 'VENUE',
     status: 'DISCUSSING',
     requestedBy: 'Band',
+    createdBy: 'BAND',
     assignedTo: 'Engineer',
     comments: [
       {
         id: 'c-meals-1',
         author: 'Engineer',
         role: 'ENGINEER',
-        text: 'can I have food too?!',
-        timestamp: '2023-10-26T11:00:00Z',
+        text: 'Can you let me know the vegan options available? And yes, Afke, you can eat too! 😄',
+        timestamp: '2025-03-01T14:55:00Z',
         type: 'TEXT'
       }
     ],
-    specs: { quantity: 5 }
+    specs: { quantity: 5, notes: '4 regular, 1 vegan' }
   },
+
   {
-    id: '12',
+    id: '16',
     category: 'HOSPITALITY',
     title: 'Parking',
-    description: '1 parking spot required.',
+    description: '1 parking spot for the vehicle.',
     provider: 'VENUE',
     status: 'AGREED',
     requestedBy: 'Band',
+    createdBy: 'BAND',
     assignedTo: 'Engineer',
     comments: [],
-    specs: { quantity: 1 }
-  },
-  // Engineer Added Items
-  {
-    id: '13',
-    category: 'PA',
-    title: 'House PA',
-    description: 'Main PA system for the venue.',
-    provider: 'VENUE',
-    status: 'PENDING',
-    requestedBy: 'Engineer',
-    createdBy: 'ENGINEER',
-    pendingConfirmationFrom: 'BAND',
-    assignedTo: 'Engineer',
-    comments: [
-      {
-        id: 'c-pa-1',
-        author: 'Engineer',
-        role: 'ENGINEER',
-        text: 'Suggest using the house PA of Fifth NRE.',
-        timestamp: '2023-10-26T09:00:00Z',
-        type: 'TEXT'
-      }
-    ],
-    specs: { notes: 'Fifth NRE House System' }
-  },
-  {
-    id: '14',
-    category: 'STAGE',
-    title: 'Stage Size',
-    description: 'The stage will be 5 x 3 meters, is that big enough for you?',
-    provider: 'VENUE',
-    status: 'DISCUSSING',
-    requestedBy: 'Engineer',
-    createdBy: 'ENGINEER',
-    assignedTo: 'Engineer',
-    comments: [],
-    specs: { notes: '5m x 3m' }
+    specs: { quantity: 1, notes: 'Close to load-in area' }
   }
 ];
