@@ -1,43 +1,58 @@
 import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { BriefItem, MOCK_ITEMS, MOCK_GLOBAL_MESSAGES, Role, Comment, ChatMessage } from './types';
 import { BriefList } from './components/BriefList';
 import { ShowSpec } from './components/ShowSpec';
-import { RefreshCw, Music, UserCog } from 'lucide-react';
+import { RefreshCw, Music, UserCog, ChevronLeft } from 'lucide-react';
 import { GlobalChat } from './components/GlobalChat';
 import { AnimatePresence, motion } from 'motion/react';
+import { MOCK_SHOW_BRIEFS } from './data/mockShowBriefs';
+
+const SHOW_NAMES: Record<string, string> = {
+  'show-0': 'Fake Flaviana Quintet',
+  'show-1': 'Paradiso – Main Stage',
+  'show-2': 'Melkweg OZ',
+  'show-3': 'Shelter',
+  'show-4': 'Tolhuistuin',
+};
 
 function App() {
+  const { showId = 'show-1' } = useParams<{ showId: string }>();
+  const navigate = useNavigate();
+  const storageKey = `briefItems_${showId}`;
+  const messagesKey = `globalMessages_${showId}`;
+  const mockBriefs = MOCK_SHOW_BRIEFS[showId] || MOCK_SHOW_BRIEFS['show-1'];
+
   const [items, setItems] = useState<BriefItem[]>(() => {
-    const saved = localStorage.getItem('briefItems');
-    return saved ? JSON.parse(saved) : MOCK_ITEMS;
+    const saved = localStorage.getItem(storageKey);
+    return saved ? JSON.parse(saved) : mockBriefs;
   });
 
   useEffect(() => {
-    localStorage.setItem('briefItems', JSON.stringify(items));
-  }, [items]);
+    localStorage.setItem(storageKey, JSON.stringify(items));
+  }, [items, storageKey]);
 
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
-
 
   const handleResetData = () => {
     setIsResetDialogOpen(true);
   };
 
   const confirmResetData = () => {
-    setItems(MOCK_ITEMS);
-    localStorage.removeItem('briefItems');
+    setItems(mockBriefs);
+    localStorage.removeItem(storageKey);
     setSelectedItem(null);
     setIsResetDialogOpen(false);
   };
 
   const [globalMessages, setGlobalMessages] = useState<ChatMessage[]>(() => {
-    const saved = localStorage.getItem('globalMessages');
-    return saved ? JSON.parse(saved) : MOCK_GLOBAL_MESSAGES;
+    const saved = localStorage.getItem(messagesKey);
+    return saved ? JSON.parse(saved) : [];
   });
 
   useEffect(() => {
-    localStorage.setItem('globalMessages', JSON.stringify(globalMessages));
-  }, [globalMessages]);
+    localStorage.setItem(messagesKey, JSON.stringify(globalMessages));
+  }, [globalMessages, messagesKey]);
 
 
   const handleAddGlobalMessage = (text: string) => {
@@ -409,7 +424,21 @@ function App() {
     <div className="flex flex-col h-screen bg-[#E4E3E0] text-[#141414] font-sans overflow-hidden">
       {/* Header */}
       <header className="h-14 border-b border-[#141414] bg-[#E4E3E0] flex items-center justify-between px-4 shrink-0 z-10 gap-4 relative">
-        {/* Left: Branding + Role Selector */}
+        {/* Left: Back + Show Name */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="p-1.5 hover:bg-[#141414] hover:text-[#E4E3E0] transition-colors rounded-full shrink-0"
+            title="Back to Dashboard"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <h2 className="text-sm font-mono font-bold truncate">
+            {SHOW_NAMES[showId] || showId}
+          </h2>
+        </div>
+
+        {/* Center: Branding + Role Selector */}
         <div className="flex items-center gap-4 md:gap-6">
           <h1 className="text-lg font-bold tracking-tighter font-mono hidden md:block">
             TECH<span className="text-emerald-500">RIDER</span>
